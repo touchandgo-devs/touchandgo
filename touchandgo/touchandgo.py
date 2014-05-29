@@ -1,8 +1,8 @@
 import argparse
 
 from fabric.operations import local
-
 from torrentmediasearcher import TorrentMediaSearcher
+from subtitles import get_subtitle
 
 
 def main(name, season, episode):
@@ -14,6 +14,7 @@ def main(name, season, episode):
 
 def get_magnet(results):
     magnet = results['magnet']
+    #get_subtitle(magnet)
     command = "peerflix \"%s\" --vlc" % magnet
     local(command, capture=False)
 

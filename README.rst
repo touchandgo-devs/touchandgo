@@ -9,6 +9,8 @@ python touchandgo.py Crisis 1 5
 
 Requirements
 ------------
-* python-libtorrent
 * TorrentMediaSearcher
-* peerflix
+* fabric
+* python-libtorrent (via apt)
+* peerflix (via npm)
+* VLC
