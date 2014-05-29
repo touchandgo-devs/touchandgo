@@ -14,8 +14,8 @@ def main(name, season, episode):
 
 def get_magnet(results):
     magnet = results['magnet']
-    #get_subtitle(magnet)
-    command = "peerflix \"%s\" --vlc" % magnet
+    subtitle = get_subtitle(magnet)
+    command = "peerflix \"%s\" -t /tmp/%s --vlc" % (magnet, subtitle)
     local(command, capture=False)
 
 if __name__ == '__main__':

@@ -1,7 +1,10 @@
 from time import sleep
-from babelfish import Language
-from subliminal import download_best_subtitles, scan_videos
+import periscope
+#from babelfish import Language
+#from subliminal import download_best_subtitles, scan_videos
 from libtorrent import add_magnet_uri, session
+from os import system
+
 
 def get_subtitle(magnet):
     print("Explorando torrent")
@@ -19,15 +22,16 @@ def get_subtitle(magnet):
         if file_.size > biggest_file[1]:
             biggest_file = [file_.path, file_.size]
 
-    import periscope
 
     subdl = periscope.Periscope("/tmp")
-    subdl.pluginNames = ['OpenSubtitles', 'Subtitulos', 'Podnapisi', 'TheSubDB']
+    subdl.pluginNames = ['OpenSubtitles', 'Subtitulos', 'TheSubDB']
     filepath = biggest_file[0]
-    print filepath
-    print subdl.listSubtitles(filepath, ['es'])
-    subtitle = subdl.downloadSubtitle(filepath, ['es']) # for english only
-    print subtitle
+    system("subliminal -len /tmp/%s" % filepath)
+    return ".".join(filepath.split(".")[:-1]) + ".en.srt"
+    #print filepath
+    #print subdl.listSubtitles(filepath, ['es'])
+    #subtitle = subdl.downloadSubtitle(filepath, ['es']) # for english only
+    #print subtitle
 
     #videos = scan_videos(['~/Downloads'], subtitles=True, embedded_subtitles=True)#, age=timedelta(weeks=1))
     #print videos
