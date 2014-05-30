@@ -11,6 +11,8 @@ How to use
  
   E.g.:  python touchandgo.py Crisis 1 5
 
+.. image:: ./screenshots/touchandgo.png
+
 Requirements
 ------------
 * TorrentMediaSearcher
