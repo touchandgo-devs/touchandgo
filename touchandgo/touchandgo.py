@@ -7,7 +7,8 @@ from torrentmediasearcher import TorrentMediaSearcher
 from subtitles import get_subtitle
 
 
-def main(name, season=None, episode=None, sub_lang=None, serve=False):
+def main(name, season=None, episode=None, sub_lang=None, serve=False,
+         quality=None):
 
     def get_magnet(results):
         magnet = results['magnet']
@@ -27,11 +28,11 @@ def main(name, season=None, episode=None, sub_lang=None, serve=False):
     search = TorrentMediaSearcher
     if season is None and episode is None:
         search.request_movie_magnet('torrentproject', name,
-                                    callback=get_magnet)
+                                    callback=get_magnet, quality=quality)
     else:
         search.request_tv_magnet(provider='eztv', show=name,
                                  season=int(season), episode=int(episode),
-                                 quality='normal', callback=get_magnet)
+                                 quality=quality, callback=get_magnet)
 
 
 if __name__ == '__main__':
@@ -41,7 +42,8 @@ if __name__ == '__main__':
     parser.add_argument("sea_ep", nargs='*', default=[None, None])
     parser.add_argument("--sub", nargs='?', default=None)
     parser.add_argument("--serve", action="store_true")
+    parser.add_argument("--quality", nargs='?', default=None)
     args = parser.parse_args()
 
     main(args.name, season=args.sea_ep[0], episode=args.sea_ep[1],
-         sub_lang=args.sub, serve=args.serve)
+         sub_lang=args.sub, serve=args.serve, quality=args.quality)
