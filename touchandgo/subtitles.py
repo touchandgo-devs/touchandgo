@@ -1,19 +1,24 @@
 from time import sleep
-import periscope
-#from babelfish import Language
-#from subliminal import download_best_subtitles, scan_videos
+
+from babelfish import Language
 from libtorrent import add_magnet_uri, session
-from os import system
+from guessit import guess_video_info
+from subliminal import download_best_subtitles
+from subliminal.subtitle import get_subtitle_path
+from subliminal.video import Video
 
 
-def get_subtitle(magnet):
+def get_subtitle(magnet, lang):
     print("Explorando torrent")
     lt_session = session()
     params = {"save_path": "/tmp"}
     handle = add_magnet_uri(lt_session, magnet, params)
+    print "esperando"
     while (not handle.has_metadata()):
         sleep(.1)
+    print "esperando"
     info = handle.get_torrent_info()
+    print "esperando", info
     files = info.files()
 
     biggest_file = ("", 0)
@@ -22,20 +27,19 @@ def get_subtitle(magnet):
         if file_.size > biggest_file[1]:
             biggest_file = [file_.path, file_.size]
 
-
-    subdl = periscope.Periscope("/tmp")
-    subdl.pluginNames = ['OpenSubtitles', 'Subtitulos', 'TheSubDB']
+    print("Adivinando data")
     filepath = biggest_file[0]
-    system("subliminal -len /tmp/%s" % filepath)
-    return ".".join(filepath.split(".")[:-1]) + ".en.srt"
-    #print filepath
-    #print subdl.listSubtitles(filepath, ['es'])
-    #subtitle = subdl.downloadSubtitle(filepath, ['es']) # for english only
-    #print subtitle
+    guess = guess_video_info(filepath, info = ['filename'])
+    video = Video.fromguess(filepath, guess)
+    video.size = biggest_file[1]
+    print("Bajando el subtitulo")
+    subtitle = download_best_subtitles([video], {Language(lang)}, single=True)
+    if not len(subtitle):
+        subtitle = None
+    else:
+        subtitle = get_subtitle_path(video.name)
+    lt_session.remove_torrent(handle)
+    return subtitle
 
-    #videos = scan_videos(['~/Downloads'], subtitles=True, embedded_subtitles=True)#, age=timedelta(weeks=1))
-    #print videos
-    #download_best_subtitles(biggest_file[0], {Language('spa')})#, age=timedelta(week=1))
 
-    #print("Bajando el subtitulo")
 
