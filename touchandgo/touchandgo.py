@@ -11,10 +11,10 @@ def main(name, season=None, episode=None, sub_lang=None, serve=False,
          quality=None):
 
     def get_magnet(results):
+        print("Processing magnet link")
         magnet = results['magnet']
         command = "peerflix \"%s\"" % magnet
         if sub_lang is not None:
-            print("Obteniendo subtitulo")
             subtitle = get_subtitle(magnet, sub_lang)
             if subtitle is not None:
                 command += " -t %s" % subtitle
@@ -24,12 +24,14 @@ def main(name, season=None, episode=None, sub_lang=None, serve=False,
 
         local(command, capture=False)
 
-    print("Obteniendo magnet")
+    print("Searching torrent")
     search = TorrentMediaSearcher
     if season is None and episode is None:
         search.request_movie_magnet('torrentproject', name,
                                     callback=get_magnet, quality=quality)
     else:
+        if quality is None:
+            quality = 'normal'
         search.request_tv_magnet(provider='eztv', show=name,
                                  season=int(season), episode=int(episode),
                                  quality=quality, callback=get_magnet)
