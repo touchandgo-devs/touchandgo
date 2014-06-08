@@ -27,10 +27,10 @@ in your video player open http://<server address>:5000/crisis/1/5
 just enjoy it.
 
 
-
 Requirements
 ------------
 * TorrentMediaSearcher
+* subliminal
 * netifaces
 * flask
 * python-libtorrent (via apt)
