@@ -15,8 +15,11 @@ def serve(py_exec=None):
     @app.route("/<name>/<season>/<episode>")
     def redirect_to(name, season=None, episode=None):
         interface = get_interface()
-        command = "%s touchandgo.py \"%s\" %s %s --daemon" % \
-            (py_exec, name, season, episode)
+        command = "%s touchandgo.py \"%s\" " % (py_exec, name)
+        if season is not None:
+            command += "%s %s " % (season, episode)
+        command += "--daemon"
+        print command
         process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
         sleep(10)
         port = 8888

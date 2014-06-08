@@ -16,7 +16,10 @@ class Lock(FileLock):
 
     def _write_data(self):
         file_ = open('%s.lock' % self.path, 'w')
-        file_.write(','.join((self.pid, self.name, self.season, self.episode,
+        season = self.season if self.season is not None else ""
+        episode = self.episode if self.episode is not None else ""
+
+        file_.write(','.join((self.pid, self.name, season, episode,
                               self.port)))
         file_.close()
 
@@ -27,9 +30,17 @@ class Lock(FileLock):
         return parts
 
     def is_same_file(self, name, season, episode):
+        ret = False
         parts = self._get_file_data()
-        return parts[1] == name and parts[2] == season and parts[3] == episode
+        if len(parts) > 1:
+            if season is None:
+                season = ''
+            if episode is None:
+                episode = ''
+            ret = parts[1] == name and parts[2] == season and parts[3] == episode
+        return ret
 
     def get_pid(self):
-        return int(self._get_file_data()[0])
+        pid = self._get_file_data()[0]
+        return int(pid) if pid != '' else None
 
