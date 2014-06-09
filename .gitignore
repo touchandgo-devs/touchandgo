@@ -1,0 +1,6 @@
+*.pyc
+*.swp
+.ropeproject
+dist
+build
+Touchandgo.egg-info
