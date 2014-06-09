@@ -2,27 +2,36 @@ Touchandgo
 ==========
 A python app and library to watch series magically
 
+How to install
+--------------
+
+::
+
+  pip install touchandgo
+
+
 How to use
 ----------
 
 ::
 
-  python touchandgo.py [series name] [season] [episode]
+  touchandgo [series name] [season] [episode]
  
-  E.g.:  python touchandgo.py Crisis 1 5
+  E.g.:  touchandgo Crisis 1 5
 
 
-streaming proxy:
+How to run streaming proxy
+_______________
 
 
-in the computer
+In the computer
 
 ::
 
-  python server.py
+  tsproxy 
 
 
-in your video player open http://<server address>:5000/crisis/1/5
+In your video player open http://<server address>:5000/crisis/1/5
 
 just enjoy it.
 
@@ -33,6 +42,7 @@ Requirements
 * subliminal
 * netifaces
 * flask
+* simplejson
 * python-libtorrent (via apt)
 * peerflix (via npm)
 * VLC

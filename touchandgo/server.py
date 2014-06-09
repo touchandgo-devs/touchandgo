@@ -7,8 +7,12 @@ from flask import Flask, redirect
 from helpers import get_interface
 
 def serve(py_exec=None):
-    if py_exec is None:
-        py_exec = "python"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--python", default="python")
+    args = parser.parse_args()
+
+    py_exec = args.python
+
     app = Flask("touchandgo")
 
     @app.route("/<name>")
@@ -29,7 +33,4 @@ def serve(py_exec=None):
     app.run(host="0.0.0.0")
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--python", default="python")
-    args = parser.parse_args()
-    serve(args.python)
+    serve()
