@@ -49,14 +49,20 @@ def main():
     parser.add_argument("--quality", nargs='?', default=None)
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--port", default="8888")
+    parser.add_argument("--season", action="store_true")
     args = parser.parse_args()
 
     if args.daemon:
         daemonize(args, watch)
     else:
-        watch(args.name, season=args.sea_ep[0], episode=args.sea_ep[1],
-              sub_lang=args.sub, serve=args.serve, quality=args.quality,
-              port=args.port)
+        episode = int(args.sea_ep[1])
+        play_next_episode = True
+        while play_next_episode:
+            watch(args.name, season=args.sea_ep[0], episode=episode,
+                sub_lang=args.sub, serve=args.serve, quality=args.quality,
+                port=args.port)
+            episode += 1
+            play_next_episode = args.season
 
 if __name__ == '__main__':
     main()

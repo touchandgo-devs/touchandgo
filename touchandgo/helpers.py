@@ -12,12 +12,14 @@ from netifaces import interfaces, ifaddresses, AF_INET
 
 LOCKFILE = "/tmp/touchandgo"
 
+
 def get_free_port():
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.bind(('localhost', 0))
   addr, port = s.getsockname()
   s.close()
   return port
+
 
 def get_interface():
     for ifaceName in interfaces():
@@ -27,12 +29,14 @@ def get_interface():
                 if item.get('netmask') is not None and not item['addr'].startswith("127") and not item['addr'].startswith(":"):
                     return item['addr']
 
+
 def is_process_running(process_id):
     try:
         os.kill(process_id, 0)
         return True
     except OSError:
         return False
+
 
 def execute(command):
     process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
@@ -48,7 +52,7 @@ def execute(command):
 
     output = process.communicate()[0]
     exitCode = process.returncode
-    print output, exitCode
+    #print output, exitCode
 
 
 def daemonize(args, callback):
