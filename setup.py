@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name='Touchandgo',
-    version='0.1.0',
+    version='0.2.0',
     author='Felipe Lerena',
     author_email='felipelerena@gmail.com',
     packages=['touchandgo'],
@@ -26,7 +26,7 @@ setup(
                       'simplejson',
                       'python-daemon'],
     entry_points={
-        'console_scripts': ['touchandgo = touchandgo.touchandgo',
+        'console_scripts': ['touchandgo = touchandgo.touchandgo:main',
                             'tsproxy = touchandgo.server:serve']
     },
 )

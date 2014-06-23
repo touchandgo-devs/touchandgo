@@ -39,8 +39,7 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
                                  season=int(season), episode=int(episode),
                                  quality=quality, callback=get_magnet)
 
-
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("name")
 
@@ -58,3 +57,6 @@ if __name__ == '__main__':
         watch(args.name, season=args.sea_ep[0], episode=args.sea_ep[1],
               sub_lang=args.sub, serve=args.serve, quality=args.quality,
               port=args.port)
+
+if __name__ == '__main__':
+    main()
