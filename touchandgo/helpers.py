@@ -52,7 +52,7 @@ def execute(command):
 
 
 def daemonize(args, callback):
-    #with DaemonContext():
+    with DaemonContext():
         create_process = False
         lock = Lock(LOCKFILE, os.getpid(), args.name, args.sea_ep[0],
                     args.sea_ep[1], args.port)
