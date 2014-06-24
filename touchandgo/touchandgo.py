@@ -55,7 +55,7 @@ def main():
     if args.daemon:
         daemonize(args, watch)
     else:
-        episode = int(args.sea_ep[1])
+        episode = int(args.sea_ep[1]) if args.sea_ep[1] is not None else None
         play_next_episode = True
         while play_next_episode:
             watch(args.name, season=args.sea_ep[0], episode=episode,
