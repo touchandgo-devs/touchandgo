@@ -1,10 +1,14 @@
 import argparse
 
+from os.path import abspath, dirname, join, getmtime
+
 from subprocess import PIPE, STDOUT, Popen
-from time import sleep
+from time import sleep, ctime
+from datetime import datetime
 from flask import Flask, redirect
 
-from helpers import get_interface
+from helpers import get_interface, LOCKFILE
+
 
 def serve(py_exec=None):
     parser = argparse.ArgumentParser()
@@ -19,13 +23,22 @@ def serve(py_exec=None):
     @app.route("/<name>/<season>/<episode>")
     def redirect_to(name, season=None, episode=None):
         interface = get_interface()
-        command = "%s touchandgo.py \"%s\" " % (py_exec, name)
+        path = abspath(__file__)
+        dir_path = dirname(path)
+        exec_ = join(dir_path, "touchandgo.py")
+        command = '%s %s \"%s\" ' % (py_exec, exec_, name)
         if season is not None:
             command += "%s %s " % (season, episode)
         command += "--daemon"
-        print command
+        print "running", command
         process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
-        sleep(10)
+        now = datetime.now()
+        timediff = now - datetime.fromtimestamp(getmtime(LOCKFILE + ".lock"))
+        while timediff.total_seconds() < 10:
+            sleep(1)
+            now = datetime.now()
+            timediff = now - datetime.fromtimestamp(getmtime(LOCKFILE + ".lock"))
+            print "waiting"
         port = 8888
         return redirect("http://%s:%s" % (interface, port))
 

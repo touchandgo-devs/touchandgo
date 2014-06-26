@@ -7,18 +7,18 @@ from daemon import DaemonContext
 from lock import Lock
 
 from subprocess import PIPE, STDOUT, Popen
-from netifaces import interfaces, ifaddresses, AF_INET
+from netifaces import interfaces, ifaddresses
 
 
 LOCKFILE = "/tmp/touchandgo"
 
 
 def get_free_port():
-  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s.bind(('localhost', 0))
-  addr, port = s.getsockname()
-  s.close()
-  return port
+    socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    socket_.bind(('localhost', 0))
+    addr, port = socket_.getsockname()
+    socket_.close()
+    return port
 
 
 def get_interface():
@@ -26,7 +26,9 @@ def get_interface():
         addresses = ifaddresses(ifaceName)
         for address in addresses.values():
             for item in address:
-                if item.get('netmask') is not None and not item['addr'].startswith("127") and not item['addr'].startswith(":"):
+                if item.get('netmask') is not None and \
+                        not item['addr'].startswith("127") and \
+                        not item['addr'].startswith(":"):
                     return item['addr']
 
 
@@ -43,11 +45,12 @@ def execute(command):
     print("Running peerflix")
     while True:
         nextline = process.stdout.readline()
-        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', nextline)
+        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
+                          nextline)
         if len(urls):
             print("streaming url: %s" % urls[0])
             break
-        if nextline == '' and process.poll() != None:
+        if nextline == '' and process.poll() is not None:
             break
 
     output = process.communicate()[0]
@@ -63,7 +66,7 @@ def daemonize(args, callback):
         if lock.is_locked():
             lock_pid = lock.get_pid()
             if not lock.is_same_file(args.name, args.sea_ep[0],
-                                    args.sea_ep[1]) \
+                                     args.sea_ep[1]) \
                     or not is_process_running(lock_pid):
                 try:
                     os.kill(lock_pid, signal.SIGQUIT)

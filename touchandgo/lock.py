@@ -37,7 +37,8 @@ class Lock(FileLock):
                 season = ''
             if episode is None:
                 episode = ''
-            ret = parts[1] == name and parts[2] == season and parts[3] == episode
+            ret = parts[1] == name and parts[2] == season and \
+                parts[3] == episode
         return ret
 
     def get_pid(self):
