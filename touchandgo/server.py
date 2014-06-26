@@ -1,13 +1,12 @@
 import argparse
 
-from os.path import abspath, dirname, join, getmtime
+from os.path import abspath, dirname, join
 
 from subprocess import PIPE, STDOUT, Popen
-from time import sleep, ctime
-from datetime import datetime
+from time import sleep
 from flask import Flask, redirect
 
-from helpers import get_interface, LOCKFILE
+from helpers import get_interface, get_lock_diff
 
 
 def serve(py_exec=None):
@@ -32,13 +31,9 @@ def serve(py_exec=None):
         command += "--daemon"
         print "running", command
         process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
-        now = datetime.now()
-        timediff = now - datetime.fromtimestamp(getmtime(LOCKFILE + ".lock"))
-        while timediff.total_seconds() < 10:
+        sleep(1)
+        while get_lock_diff() < 10:
             sleep(1)
-            now = datetime.now()
-            timediff = now - datetime.fromtimestamp(getmtime(LOCKFILE + ".lock"))
-            print "waiting"
         port = 8888
         return redirect("http://%s:%s" % (interface, port))
 

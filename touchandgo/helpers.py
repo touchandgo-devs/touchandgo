@@ -4,9 +4,11 @@ import signal
 import socket
 
 from daemon import DaemonContext
+from datetime import datetime
 from lock import Lock
-
+from os.path import getmtime
 from subprocess import PIPE, STDOUT, Popen
+
 from netifaces import interfaces, ifaddresses
 
 
@@ -84,3 +86,14 @@ def daemonize(args, callback):
             callback(args.name, season=args.sea_ep[0], episode=args.sea_ep[1],
                      serve=True, port=args.port)
             lock.release()
+
+
+def get_lock_diff():
+    timediff = 0
+    try:
+        now = datetime.now()
+        timediff = now - datetime.fromtimestamp(getmtime(LOCKFILE + ".lock"))
+        timediff = timediff.total_seconds()
+    except OSError:
+        pass
+    return timediff
