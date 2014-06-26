@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name='Touchandgo',
-    version='0.3.0',
+    version='0.3.2',
     author='Felipe Lerena',
     author_email='felipelerena@gmail.com',
     packages=['touchandgo'],
