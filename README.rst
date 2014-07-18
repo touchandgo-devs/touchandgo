@@ -43,6 +43,7 @@ Requirements
 * netifaces
 * flask
 * simplejson
+* ojota
 * python-libtorrent (via apt)
 * peerflix (via npm)
 * VLC
