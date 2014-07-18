@@ -12,6 +12,7 @@ setup(
     name='Touchandgo',
     version='0.3.3',
     author='Felipe Lerena',
+    description='A python app and library to watch series magically',
     author_email='felipelerena@gmail.com',
     packages=['touchandgo'],
     scripts=[],
