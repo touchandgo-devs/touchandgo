@@ -30,7 +30,8 @@ def get_interface():
             for item in address:
                 if item.get('netmask') is not None and \
                         not item['addr'].startswith("127") and \
-                        not item['addr'].startswith(":"):
+                        not item['addr'].startswith(":") and \
+                        len(item['addr']) < 17:
                     return item['addr']
 
 

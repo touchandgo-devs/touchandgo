@@ -1,0 +1,6 @@
+#EXTM3U
+{%for episode in episodes %}
+
+    #EXTINF:-1,{{series}} season {{season}} episode {{episode}}
+    {{url}}/{{episode}}
+{%endfor%}

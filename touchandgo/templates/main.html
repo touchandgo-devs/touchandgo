@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>Touchandgo</title>
+    </head>
+    <body>
+        {%for item in items%}
+            <div>
+              <a href="/{{item.name}}/{{item.season}}/{{item.episode}}">{{item.name}} {{item.season}} {{item.episode}}</a> 
+              <a href="/{{item.name}}/{{item.season}}/{{item.next}}">></a> 
+            </div>
+        {%endfor%} 
+    </body>
+</html>

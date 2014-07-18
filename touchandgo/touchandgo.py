@@ -1,10 +1,12 @@
 #! /usr/bin/env python
 import argparse
 
+from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
 from subtitles import get_subtitle
 from helpers import execute, daemonize
+from history import History
 
 
 def watch(name, season=None, episode=None, sub_lang=None, serve=False,
@@ -19,12 +21,16 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
             subtitle = get_subtitle(magnet, sub_lang)
             if subtitle is not None:
                 command += " -t %s" % subtitle
-        if port is not None:#
+        if port is not None:
             command += " -p%s" % port
         if not serve:
             command += " --vlc"
 
         print("executing command %s" % command)
+        history = History(date=int(time()), name=name, season=season,
+                          episode=episode)
+        history.save()
+        history.update()
         execute(command)
 
     print("Searching torrent")
