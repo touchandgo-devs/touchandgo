@@ -1,7 +1,8 @@
 from lockfile import FileLock
 
 class Lock(FileLock):
-    def __init__(self, file_, pid, name, season, episode, port):
+    def __init__(self, file_, pid=None, name=None, season=None, episode=None,
+                 port=None):
         FileLock.__init__(self, file_)
         self.pid = str(pid)
         self.name = name

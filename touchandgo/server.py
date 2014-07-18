@@ -1,12 +1,15 @@
 import argparse
+import signal
 
+from os import kill
 from os.path import abspath, dirname, join
 
 from subprocess import PIPE, STDOUT, Popen
 from time import sleep
 from flask import Flask, redirect
 
-from helpers import get_interface, get_lock_diff
+from helpers import get_interface, get_lock_diff, LOCKFILE
+from lock import Lock
 
 
 def serve(py_exec=None):
@@ -36,6 +39,13 @@ def serve(py_exec=None):
             sleep(1)
         port = 8888
         return redirect("http://%s:%s" % (interface, port))
+
+    @app.route("/kill")
+    def kill_():
+        lock = Lock(LOCKFILE)
+        kill(lock.get_pid(), signal.SIGQUIT)
+        return "OK"
+
 
     app.debug = True
     app.run(host="0.0.0.0")
