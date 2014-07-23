@@ -36,6 +36,8 @@ In your video player open http://<server address>:5000/crisis/1/5
 just enjoy it.
 
 
+.. image:: ./screenshots/touchandgo.png
+
 Requirements
 ------------
 * TorrentMediaSearcher
