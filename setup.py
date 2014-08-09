@@ -18,7 +18,6 @@ setup(
     scripts=[],
     url='http://github.com/felipelerena/touchandgo/',
     license='LICENSE.txt',
-    description='',
     long_description=open('README.rst').read(),
     install_requires=['TorrentMediaSearcher',
                       'subliminal',
