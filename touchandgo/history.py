@@ -1,7 +1,4 @@
-from ojota import Ojota, set_data_source
-
-
-set_data_source("/home/felipe/.touchandgo")
+from ojota import Ojota
 
 
 class History(Ojota):

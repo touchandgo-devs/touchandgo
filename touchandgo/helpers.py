@@ -6,10 +6,13 @@ import socket
 from daemon import DaemonContext
 from datetime import datetime
 from lock import Lock
-from os.path import getmtime
+from os import mkdir
+from os.path import getmtime, exists
 from subprocess import PIPE, STDOUT, Popen
 
 from netifaces import interfaces, ifaddresses
+
+from ojota import set_data_source
 
 
 LOCKFILE = "/tmp/touchandgo"
@@ -98,3 +101,12 @@ def get_lock_diff():
     except OSError:
         pass
     return timediff
+
+
+def set_config_dir():
+    data_folder = "%s/.touchandgo" % os.getenv("HOME")
+    if not exists(data_folder):
+        mkdir(data_folder)
+
+    set_data_source(data_folder)
+

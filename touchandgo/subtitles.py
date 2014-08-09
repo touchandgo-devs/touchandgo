@@ -13,6 +13,7 @@ def get_subtitle(magnet, lang):
     lt_session = session()
     params = {"save_path": "/tmp"}
     handle = add_magnet_uri(lt_session, magnet, params)
+
     while (not handle.has_metadata()):
         sleep(.1)
     info = handle.get_torrent_info()
@@ -26,7 +27,7 @@ def get_subtitle(magnet, lang):
 
     print("Guessing data")
     filepath = biggest_file[0]
-    guess = guess_video_info(filepath, info = ['filename'])
+    guess = guess_video_info(filepath, info=['filename'])
     video = Video.fromguess(filepath, guess)
     video.size = biggest_file[1]
     print("Donwloading Subtitle")

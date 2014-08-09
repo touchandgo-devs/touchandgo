@@ -5,13 +5,12 @@ from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
 from subtitles import get_subtitle
-from helpers import execute, daemonize
+from helpers import execute, daemonize, set_config_dir
 from history import History
 
 
 def watch(name, season=None, episode=None, sub_lang=None, serve=False,
-         quality=None, port=None):
-
+          quality=None, port=None):
 
     def get_magnet(results):
         print("Processing magnet link")
@@ -25,6 +24,8 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
             command += " -p%s" % port
         if not serve:
             command += " --vlc"
+
+        set_config_dir()
 
         print("executing command %s" % command)
         history = History(date=int(time()), name=name, season=season,
@@ -65,8 +66,8 @@ def main():
         play_next_episode = True
         while play_next_episode:
             watch(args.name, season=args.sea_ep[0], episode=episode,
-                sub_lang=args.sub, serve=args.serve, quality=args.quality,
-                port=args.port)
+                  sub_lang=args.sub, serve=args.serve, quality=args.quality,
+                  port=args.port)
             episode += 1
             play_next_episode = args.season
 
