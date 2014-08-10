@@ -108,9 +108,9 @@ class DownloadManager(object):
         print numerales
 
         print '%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % \
-                (status.progress * 100, status.download_rate / 1000,
-                 status.upload_rate / 1000, status.num_peers,
-                 self.states[status.state])
+            (status.progress * 100, status.download_rate / 1000,
+             status.upload_rate / 1000, status.num_peers,
+             self.states[status.state])
         print "Elapsed Time", datetime.now() - self.start_time
 
     def initial_strategy(self):
