@@ -1,12 +1,11 @@
 #! /usr/bin/env python
 import argparse
 
-from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
-from subtitles import get_subtitle
-from helpers import execute, daemonize, set_config_dir
+from helpers import daemonize, set_config_dir
 from history import History
+from download import DownloadManager
 
 
 def watch(name, season=None, episode=None, sub_lang=None, serve=False,
@@ -15,24 +14,17 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
     def get_magnet(results):
         print("Processing magnet link")
         magnet = results['magnet']
-        command = "peerflix \"%s\"" % magnet
-        if sub_lang is not None:
-            subtitle = get_subtitle(magnet, sub_lang)
-            if subtitle is not None:
-                command += " -t %s" % subtitle
-        if port is not None:
-            command += " -p%s" % port
-        if not serve:
-            command += " --vlc"
-
+        manager = DownloadManager(magnet, port=port, serve=serve,
+                                  sub_lang=sub_lang)
+        manager.start()
+        """
         set_config_dir()
 
-        print("executing command %s" % command)
         history = History(date=int(time()), name=name, season=season,
                           episode=episode)
         history.save()
         history.update()
-        execute(command)
+        """
 
     print("Searching torrent")
     search = TorrentMediaSearcher
