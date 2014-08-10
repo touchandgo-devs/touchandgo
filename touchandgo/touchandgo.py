@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import argparse
 
+from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
 from helpers import daemonize, set_config_dir
@@ -17,14 +18,12 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
         manager = DownloadManager(magnet, port=port, serve=serve,
                                   sub_lang=sub_lang)
         manager.start()
-        """
         set_config_dir()
 
         history = History(date=int(time()), name=name, season=season,
                           episode=episode)
         history.save()
         history.update()
-        """
 
     print("Searching torrent")
     search = TorrentMediaSearcher

@@ -37,8 +37,10 @@ class DownloadManager(object):
                        'downloading', 'finished', 'seeding', 'allocating']
 
     def start(self):
+        print("Downloading metadata")
         while not self.handle.has_metadata():
             sleep(.1)
+        print("Starting download")
         self.session.listen_on(6881, 6891)
         self.session.start_dht()
 
@@ -51,7 +53,9 @@ class DownloadManager(object):
         while True:
             if not self.handle.is_seed():
                 self.strategy_master(chunks_strat)
-            self.defrag()
+            print "\n" * 50
+            #self.defrag()
+            self.stats()
             sleep(1)
 
     def get_biggest_file(self):
@@ -86,7 +90,8 @@ class DownloadManager(object):
                 else:
                     if self.callback is not None:
                         thread.start_new_thread(self.callback, (self, ))
-                        thread.start_new_thread(self.run_vlc, ())
+                        if not self.serve:
+                            thread.start_new_thread(self.run_vlc, ())
 
                 for i in range(self.piece_st, self.piece_st + chunks_strat):
                     self.handle.piece_priority(i, 7)
@@ -100,13 +105,15 @@ class DownloadManager(object):
 
     def defrag(self):
         status = self.handle.status()
-        numerales = "\n" * 50
+        numerales = ""
         for i, piece in enumerate(status.pieces):
             numeral = "#" if piece else " "
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
         print numerales
 
+    def stats(self):
+        status = self.handle.status()
         print '%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % \
             (status.progress * 100, status.download_rate / 1000,
              status.upload_rate / 1000, status.num_peers,

@@ -9,7 +9,7 @@ from time import sleep
 from flask import Flask, redirect, render_template, Response
 from jinja2 import FileSystemLoader
 
-from helpers import get_interface, get_lock_diff, LOCKFILE
+from helpers import get_interface, get_lock_diff, LOCKFILE, set_config_dir
 from history import History
 from lock import Lock
 
@@ -78,6 +78,7 @@ def serve(py_exec=None):
         return render_template("main.html", items=series)
 
 
+    set_config_dir()
     app.debug = True
     app.run(host="0.0.0.0")
 

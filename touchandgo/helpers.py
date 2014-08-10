@@ -1,5 +1,4 @@
 import os
-import re
 import signal
 import socket
 
@@ -8,7 +7,6 @@ from datetime import datetime
 from lock import Lock
 from os import mkdir
 from os.path import getmtime, exists
-from subprocess import PIPE, STDOUT, Popen
 
 from netifaces import interfaces, ifaddresses
 
@@ -44,24 +42,6 @@ def is_process_running(process_id):
         return True
     except OSError:
         return False
-
-
-def execute(command):
-    process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
-    print("Running peerflix")
-    while True:
-        nextline = process.stdout.readline()
-        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
-                          nextline)
-        if len(urls):
-            print("streaming url: %s" % urls[0])
-            break
-        if nextline == '' and process.poll() is not None:
-            break
-
-    output = process.communicate()[0]
-    exitCode = process.returncode
-    #print output, exitCode
 
 
 def daemonize(args, callback):
