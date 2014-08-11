@@ -55,7 +55,7 @@ class DownloadManager(object):
             if not self.handle.is_seed():
                 self.strategy_master(chunks_strat)
             print "\n" * 50
-            #self.defrag()
+            self.defrag()
             self.stats()
             sleep(1)
 
