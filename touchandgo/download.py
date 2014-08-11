@@ -159,7 +159,8 @@ def serve_file(manager):
             self.send_header('Content-type', guess["mimetype"])
             self.send_header('Mime-type', guess["mimetype"])
             self.end_headers()
-            self.wfile.write(open(video_path).read())
+            #self.wfile.write(open(video_path).read())
+            self.wfile = open(video_path, 'wb', self.wbufsize)
 
     def run(server_class=BaseHTTPServer.HTTPServer,
             handler_class=BaseHTTPServer.BaseHTTPRequestHandler):
