@@ -30,4 +30,7 @@ setup(
         'console_scripts': ['touchandgo = touchandgo.touchandgo:main',
                             'tsproxy = touchandgo.server:serve']
     },
+    package_data={
+        'touchandgo/templates': ['*'],
+    },
 )

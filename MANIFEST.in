@@ -1,0 +1,2 @@
+recursive-include touchandgo/templates *.html
+recursive-include touchandgo/templates *.j2
