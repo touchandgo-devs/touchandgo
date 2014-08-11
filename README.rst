@@ -1,12 +1,14 @@
 Touchandgo
 ==========
-A python app and library to watch series magically
+A python app and library to watch series and movies magically
 
 How to install
 --------------
 
 ::
 
+  sudo apt-get install python-libtorrent (or the name of the package on your
+  linux distro)
   pip install touchandgo
 
 
@@ -18,10 +20,13 @@ How to use
   touchandgo [series name] [season] [episode]
  
   E.g.:  touchandgo Crisis 1 5
+         touchandgo "true blood" 7 10
+         touchandgo "true blood" 7 10 --subtitles spa
+         touchandgo "never ending story"
 
 
 How to run streaming proxy
-_______________
+--------------------------
 
 
 In the computer
@@ -37,15 +42,3 @@ just enjoy it.
 
 
 .. image:: ./screenshots/touchandgo.png
-
-Requirements
-------------
-* TorrentMediaSearcher
-* subliminal
-* netifaces
-* flask
-* simplejson
-* ojota
-* python-libtorrent (via apt)
-* peerflix (via npm)
-* VLC
