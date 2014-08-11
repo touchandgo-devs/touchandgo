@@ -23,6 +23,7 @@ class DownloadManager(object):
         self.session = session()
         self.piece_st = 4
         self.first_pieces = True
+        self._video_file = None
         if port is not None:
             port = 8888
         self.port = port
@@ -57,6 +58,13 @@ class DownloadManager(object):
             #self.defrag()
             self.stats()
             sleep(1)
+
+    @property
+    def video_file(self):
+        if self._video_file is None:
+            self._video_file = self.get_biggest_file()
+
+        return self._video_file
 
     def get_biggest_file(self):
         info = self.handle.get_torrent_info()
@@ -127,7 +135,7 @@ class DownloadManager(object):
 
     def get_subtitle(self):
         print("Downloading subtitle")
-        video_file = self.get_biggest_file()
+        video_file = self.video_file
         filepath = join(TMP_DIR, video_file[0])
         guess = guess_video_info(filepath, info=['filename'])
         video = Video.fromguess(filepath, guess)
@@ -152,7 +160,7 @@ def serve_file(manager):
 
     class HTTPHandlerOne(BaseHTTPServer.BaseHTTPRequestHandler):
         def do_GET(self):
-            video = manager.get_biggest_file()
+            video = manager.video_file
             video_path = join(TMP_DIR, video[0])
             self.send_response(200)
             guess = guess_video_info(video_path, info=['filename'])
