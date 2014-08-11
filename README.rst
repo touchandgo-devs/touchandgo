@@ -21,7 +21,7 @@ How to use
  
   E.g.:  touchandgo Crisis 1 5
          touchandgo "true blood" 7 10
-         touchandgo "true blood" 7 10 --subtitles spa
+         touchandgo "true blood" 7 10 --sub spa
          touchandgo "never ending story"
 
 
