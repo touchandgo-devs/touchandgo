@@ -1,4 +1,3 @@
-import BaseHTTPServer
 import thread
 
 from os import system
@@ -13,31 +12,39 @@ from subliminal import download_best_subtitles
 from subliminal.subtitle import get_subtitle_path
 from subliminal.video import Video
 
-
-TMP_DIR = "/tmp"
+from touchandgo.constants import STATES
+from touchandgo.settings import DEBUG, TMP_DIR
+from touchandgo.stream_server import serve_file
 
 
 class DownloadManager(object):
     def __init__(self, magnet, port=None, sub_lang=None, serve=False):
-        self.start_time = datetime.now()
-        self.session = session()
-        self.piece_st = 4
-        self.first_pieces = True
-        self._video_file = None
+        self.magnet = magnet
         if port is not None:
             port = 8888
         self.port = port
-        self.callback = serve_file
-        self.serve = serve
         self.sub_lang = sub_lang
+        self.serve = serve
 
+        # number of pieces to wait until start streaming
+        self.piece_st = 4
+        # we are waiting untill all the first peices are downloaded
+        self.holding_stream = True
+        # the biggest file which is supposed to be a video file
+        self._video_file = None
+        self.callback = serve_file
+
+        self.init_handle()
+
+
+    def init_handle(self):
         params = {"save_path": TMP_DIR,
                   "allocation": "compact"}
-        self.handle = add_magnet_uri(self.session, magnet, params)
-        self.states = ['queued', 'checking', 'downloading metadata',
-                       'downloading', 'finished', 'seeding', 'allocating']
+        self.session = session()
+        self.handle = add_magnet_uri(self.session, self.magnet, params)
 
     def start(self):
+        self.start_time = datetime.now()
         print("Downloading metadata")
         while not self.handle.has_metadata():
             sleep(.1)
@@ -54,8 +61,9 @@ class DownloadManager(object):
         while True:
             if not self.handle.is_seed():
                 self.strategy_master(chunks_strat)
-            print "\n" * 50
-            self.defrag()
+            print("\n" * 50)
+            if DEBUG:
+                self.defrag()
             self.stats()
             sleep(1)
 
@@ -92,8 +100,8 @@ class DownloadManager(object):
         if all(first_n):
             self.handle.set_sequential_download(False)
             pieces_strat = pieces[self.piece_st:self.piece_st + chunks_strat]
-            if self.first_pieces or all(pieces_strat):
-                if not self.first_pieces:
+            if self.holding_stream or all(pieces_strat):
+                if not self.holding_stream:
                     self.piece_st += chunks_strat
                 else:
                     if self.callback is not None:
@@ -109,7 +117,7 @@ class DownloadManager(object):
                                self.piece_st + chunks_strat*2):
                     self.handle.piece_priority(i, 5)
                     self.handle.set_piece_deadline(i, 20000)
-                self.first_pieces = False
+                self.holding_stream = False
 
     def defrag(self):
         status = self.handle.status()
@@ -118,14 +126,13 @@ class DownloadManager(object):
             numeral = "#" if piece else " "
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
-        print numerales
+        print(numerales)
 
     def stats(self):
         status = self.handle.status()
         print '%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % \
             (status.progress * 100, status.download_rate / 1000,
-             status.upload_rate / 1000, status.num_peers,
-             self.states[status.state])
+             status.upload_rate / 1000, status.num_peers, STATES[status.state])
         print "Elapsed Time", datetime.now() - self.start_time
 
     def initial_strategy(self):
@@ -148,32 +155,3 @@ class DownloadManager(object):
             subtitle = get_subtitle_path(join(TMP_DIR, video.name))
         return subtitle
 
-def get_file(filename):
-    try:
-        src = join(TMP_DIR, filename)
-        data = open(src).read()
-        return data
-    except IOError as exc:
-        return str(exc)
-
-def serve_file(manager):
-
-    class HTTPHandlerOne(BaseHTTPServer.BaseHTTPRequestHandler):
-        def do_GET(self):
-            video = manager.video_file
-            video_path = join(TMP_DIR, video[0])
-            self.send_response(200)
-            guess = guess_video_info(video_path, info=['filename'])
-            self.send_header('Content-type', guess["mimetype"])
-            self.send_header('Mime-type', guess["mimetype"])
-            self.end_headers()
-            #self.wfile.write(open(video_path).read())
-            self.wfile = open(video_path, 'wb', self.wbufsize)
-
-    def run(server_class=BaseHTTPServer.HTTPServer,
-            handler_class=BaseHTTPServer.BaseHTTPRequestHandler):
-        server_address = ('', manager.port)
-        httpd = server_class(server_address, handler_class)
-        httpd.serve_forever()
-
-    run(handler_class=HTTPHandlerOne)

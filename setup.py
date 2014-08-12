@@ -27,7 +27,7 @@ setup(
                       'python-daemon',
                       'ojota'],
     entry_points={
-        'console_scripts': ['touchandgo = touchandgo.touchandgo:main',
+        'console_scripts': ['touchandgo = touchandgo.__init__:main',
                             'tsproxy = touchandgo.server:serve']
     },
     package_data={

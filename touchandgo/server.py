@@ -36,7 +36,6 @@ def serve(py_exec=None):
         if season is not None:
             command += "%s %s " % (season, episode)
         command += "--daemon"
-        print "running", command
         process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
         sleep(1)
         while get_lock_diff() < 10:
@@ -53,7 +52,6 @@ def serve(py_exec=None):
         template = app.jinja_env.get_template("m3u.j2")
         ret = template.render(episodes=range(episode, episode + 10),
                               series=name, season=episode, url=url)
-        print ret
         return Response(response=ret, status=200,
                         mimetype="application/x-mpegurl",
                         content_type="application/x-mpegurl")
