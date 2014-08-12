@@ -36,7 +36,6 @@ class DownloadManager(object):
 
         self.init_handle()
 
-
     def init_handle(self):
         params = {"save_path": TMP_DIR,
                   "allocation": "compact"}
@@ -61,6 +60,9 @@ class DownloadManager(object):
         while True:
             if not self.handle.is_seed():
                 self.strategy_master(chunks_strat)
+            elif self.holding_stream:
+                self.holding_stream = False
+                self.stream_video()
             print("\n" * 50)
             if DEBUG:
                 self.defrag()
@@ -105,9 +107,7 @@ class DownloadManager(object):
                     self.piece_st += chunks_strat
                 else:
                     if self.callback is not None:
-                        thread.start_new_thread(self.callback, (self, ))
-                        if not self.serve:
-                            thread.start_new_thread(self.run_vlc, ())
+                        self.stream_video()
 
                 for i in range(self.piece_st, self.piece_st + chunks_strat):
                     self.handle.piece_priority(i, 7)
@@ -118,6 +118,11 @@ class DownloadManager(object):
                     self.handle.piece_priority(i, 5)
                     self.handle.set_piece_deadline(i, 20000)
                 self.holding_stream = False
+
+    def stream_video(self):
+        thread.start_new_thread(self.callback, (self, ))
+        if not self.serve:
+            thread.start_new_thread(self.run_vlc, ())
 
     def defrag(self):
         status = self.handle.status()
