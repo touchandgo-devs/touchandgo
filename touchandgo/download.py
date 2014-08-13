@@ -42,7 +42,7 @@ class DownloadManager(object):
             #"allocation": "compact"
             }
         self.session = session()
-        self.handle = add_magnet_uri(self.session, self.magnet, params)
+        self.handle = add_magnet_uri(self.session, str(self.magnet), params)
 
     def start(self):
         self.start_time = datetime.now()
@@ -153,10 +153,12 @@ class DownloadManager(object):
             self.handle.piece_priority(i, 7)
             self.handle.set_piece_deadline(i, 10000)
 
+        """
         last_piece = len(status.pieces) - 1
         for i in range(last_piece-1, last_piece+1):
             self.handle.piece_priority(i, 7)
             self.handle.set_piece_deadline(i, 10000)
+        """
 
         return len(status.pieces) / 25
 
