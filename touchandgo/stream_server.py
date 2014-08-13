@@ -107,13 +107,12 @@ def serve_file(manager):
                 #                "serving complete file")
                 self.range_from = self.range_to = None
 
+            self.send_header("Accept-Ranges", "bytes")
             if self.range_from is not None or self.range_to is not None:
                 self.send_response(206)
-                self.send_header("Accept-Ranges", "bytes")
             else:
                 self.send_response(200)
             guess = guess_video_info(path, info=['filename'])
-            self.send_header('Mime-type', guess["mimetype"])
             self.send_header("Content-Type", guess['mimetype'])
             if self.range_from is not None or self.range_to is not None:
                 # TODO: Should also check that range is within the file size
@@ -140,9 +139,9 @@ def serve_file(manager):
                 pass
             self.rfile.close()
 
-
     def run(server_class=ThreadedHTTPServer,
             handler_class=SimpleHTTPRequestHandler):
+        print("serving on http://localhost:%s" % manager.port)
         server_address = ('0.0.0.0', manager.port)
         httpd = server_class(server_address, handler_class)
         httpd.serve_forever()

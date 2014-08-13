@@ -15,6 +15,7 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
     def get_magnet(results):
         print("Processing magnet link")
         magnet = results['magnet']
+        print(magnet)
         manager = DownloadManager(magnet, port=port, serve=serve,
                                   sub_lang=sub_lang)
         manager.start()

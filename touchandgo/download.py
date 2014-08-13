@@ -20,9 +20,9 @@ from touchandgo.stream_server import serve_file
 class DownloadManager(object):
     def __init__(self, magnet, port=None, sub_lang=None, serve=False):
         self.magnet = magnet
-        if port is not None:
+        if port is None:
             port = 8888
-        self.port = port
+        self.port = int(port)
         self.sub_lang = sub_lang
         self.serve = serve
 
@@ -37,8 +37,10 @@ class DownloadManager(object):
         self.init_handle()
 
     def init_handle(self):
-        params = {"save_path": TMP_DIR,
-                  "allocation": "compact"}
+        params = {
+            "save_path": TMP_DIR,
+            #"allocation": "compact"
+            }
         self.session = session()
         self.handle = add_magnet_uri(self.session, self.magnet, params)
 
@@ -53,21 +55,20 @@ class DownloadManager(object):
 
         chunks_strat = self.initial_strategy()
 
-        for i in range(self.piece_st):
-            self.handle.piece_priority(i, 7)
-            self.handle.set_piece_deadline(i, 10000)
-
-        while True:
-            if not self.handle.is_seed():
-                self.strategy_master(chunks_strat)
-            elif self.holding_stream:
-                self.holding_stream = False
-                self.stream_video()
-            print("\n" * 50)
-            if DEBUG:
-                self.defrag()
-            self.stats()
-            sleep(1)
+        try:
+            while True:
+                if not self.handle.is_seed():
+                    self.strategy_master(chunks_strat)
+                elif self.holding_stream:
+                    self.holding_stream = False
+                    self.stream_video()
+                print("\n" * 50)
+                if DEBUG:
+                    self.defrag()
+                self.stats()
+                sleep(1)
+        except KeyboardInterrupt:
+            _exit(0)
 
     @property
     def video_file(self):
@@ -87,7 +88,7 @@ class DownloadManager(object):
         return biggest_file
 
     def run_vlc(self):
-        command = "vlc http://localhost:%s" % self.port
+        command = "vlc http://localhost:%s -q" % self.port
         if self.sub_lang is not None:
             subtitle = self.get_subtitle()
             if subtitle is not None:
@@ -147,6 +148,16 @@ class DownloadManager(object):
     def initial_strategy(self):
         self.handle.set_sequential_download(True)
         status = self.handle.status()
+
+        for i in range(self.piece_st):
+            self.handle.piece_priority(i, 7)
+            self.handle.set_piece_deadline(i, 10000)
+
+        last_piece = len(status.pieces) - 1
+        for i in range(last_piece-1, last_piece+1):
+            self.handle.piece_priority(i, 7)
+            self.handle.set_piece_deadline(i, 10000)
+
         return len(status.pieces) / 25
 
     def get_subtitle(self):
