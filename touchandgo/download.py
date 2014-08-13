@@ -1,6 +1,6 @@
 import thread
 
-from os import system
+from os import system, _exit
 from os.path import join
 from time import sleep
 from datetime import datetime
@@ -92,7 +92,11 @@ class DownloadManager(object):
             subtitle = self.get_subtitle()
             if subtitle is not None:
                 command += " --sub-file %s" % subtitle
-        system(command)
+        try:
+            system(command)
+        except KeyboardInterrupt:
+            pass
+        _exit(0)
 
     def strategy_master(self, chunks_strat):
         status = self.handle.status()
