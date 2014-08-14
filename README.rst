@@ -8,7 +8,7 @@ How to install
 ::
 
   sudo apt-get install python-libtorrent (or the name of the package on your
-  linux distro. We are using libtorrent >= 0.16)
+  linux distro)
   pip install touchandgo
 
 
