@@ -14,6 +14,7 @@ from subliminal.subtitle import get_subtitle_path
 from subliminal.video import Video
 
 from touchandgo.constants import STATES
+from touchandgo.helpers import is_port_free, get_free_port
 from touchandgo.settings import DEBUG, TMP_DIR
 from touchandgo.stream_server import serve_file
 
@@ -27,7 +28,11 @@ class DownloadManager(object):
         self.magnet = magnet
         if port is None:
             port = 8888
-        self.port = int(port)
+        port = int(port)
+        if not is_port_free(port):
+            port = get_free_port()
+
+        self.port = port
         self.sub_lang = sub_lang
         self.serve = serve
 
@@ -68,7 +73,7 @@ class DownloadManager(object):
                 elif self.holding_stream:
                     self.holding_stream = False
                     self.stream_video()
-                print("\n" * 50)
+                print("\n" * 80)
                 if DEBUG:
                     self.defrag()
                 self.stats()

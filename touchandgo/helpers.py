@@ -23,6 +23,18 @@ def get_free_port():
     socket_.close()
     return port
 
+def is_port_free(port):
+    free = True
+    socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        socket_.bind(('localhost', port))
+    except socket.error:
+        free = False
+    socket_.close()
+
+    return free
+
+
 
 def get_interface():
     for ifaceName in interfaces():

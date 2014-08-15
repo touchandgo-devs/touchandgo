@@ -56,7 +56,7 @@ def main():
     parser.add_argument("--serve", action="store_true")
     parser.add_argument("--quality", nargs='?', default=None)
     parser.add_argument("--daemon", action="store_true")
-    parser.add_argument("--port", default="8888")
+    parser.add_argument("--port", "-p", default="8888")
     parser.add_argument("--season", action="store_true")
     parser.add_argument("--verbose", action="store_true", default=None)
 
