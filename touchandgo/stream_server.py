@@ -3,7 +3,7 @@ http range detection based on
  https://github.com/menboku/musicsharer/blob/master/HTTPRangeServer.py
 """
 import re
-import socket
+import logging
 
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
@@ -15,6 +15,8 @@ from os.path import join
 from guessit import guess_video_info
 
 from touchandgo.settings import TMP_DIR
+
+log = logging.getLogger('touchandgo.stream_server')
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -103,8 +105,8 @@ def serve_file(manager):
             except InvalidRangeHeader:
                 # Just serve them the whole file, although it's possibly
                 # more correct to return a 4xx error?
-                #logging.warning("Range header parsing failed, "
-                #                "serving complete file")
+                log.warning("Range header parsing failed, "
+                                "serving complete file")
                 self.range_from = self.range_to = None
 
             self.send_header("Accept-Ranges", "bytes")
@@ -142,6 +144,7 @@ def serve_file(manager):
     def run(server_class=ThreadedHTTPServer,
             handler_class=SimpleHTTPRequestHandler):
         print("serving on http://localhost:%s" % manager.port)
+        log.info("serving on http://localhost:%s" % manager.port)
         server_address = ('0.0.0.0', manager.port)
         httpd = server_class(server_address, handler_class)
         httpd.serve_forever()
@@ -169,8 +172,8 @@ def parse_range_header(range_header, total_length):
     if range_header is None or range_header == "":
         return (None, None)
     if not range_header.startswith("bytes="):
-        # logging.error("Don't know how to parse Range: %s [1]" %
-        #                (range_header))
+        log.error("Don't know how to parse Range: %s [1]" %
+                        (range_header))
         raise InvalidRangeHeader("Don't know how to parse non-bytes Range: %s" %
                                  (range_header))
     regex = re.compile(r"^bytes=(\d*)\-(\d*)$")
@@ -178,10 +181,10 @@ def parse_range_header(range_header, total_length):
     if rangething:
         r1 = rangething.group(1)
         r2 = rangething.group(2)
-        #logging.debug("Requested range is [%s]-[%s]" % (r1, r2))
+        log.debug("Requested range is [%s]-[%s]" % (r1, r2))
 
         if r1 == "" and r2 == "":
-            # logging.warning("Requested range is meaningless")
+            log.warning("Requested range is meaningless")
             raise InvalidRangeHeader("Requested range is meaningless")
 
         if r1 == "":

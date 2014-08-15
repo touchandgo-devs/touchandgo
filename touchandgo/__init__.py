@@ -1,12 +1,18 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 import argparse
+import logging
+import sys
 
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
+from libtorrent import version as libtorrent_version
 
 from touchandgo.helpers import daemonize, set_config_dir
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
+from touchandgo.logger import log_set_up
+
+log = logging.getLogger('touchandgo.main')
 
 
 def watch(name, season=None, episode=None, sub_lang=None, serve=False,
@@ -14,8 +20,9 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
 
     def get_magnet(results):
         print("Processing magnet link")
+        log.info("Processing magnet link")
         magnet = results['magnet']
-        print(magnet)
+        log.info("Magnet: %s", magnet)
         manager = DownloadManager(magnet, port=port, serve=serve,
                                   sub_lang=sub_lang)
         manager.start()
@@ -27,6 +34,7 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
         history.update()
 
     print("Searching torrent")
+    log.info("Searching torrent")
     search = TorrentMediaSearcher
     if season is None and episode is None:
         search.request_movie_magnet('torrentproject', name,
@@ -37,6 +45,7 @@ def watch(name, season=None, episode=None, sub_lang=None, serve=False,
         search.request_tv_magnet(provider='eztv', show=name,
                                  season=int(season), episode=int(episode),
                                  quality=quality, callback=get_magnet)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -49,7 +58,14 @@ def main():
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--port", default="8888")
     parser.add_argument("--season", action="store_true")
+    parser.add_argument("--verbose", action="store_true", default=None)
+
     args = parser.parse_args()
+
+    log_set_up(args.verbose)
+    log.info("Starting touchandgo")
+    log.info("Running Python %s on %r", sys.version_info, sys.platform)
+    log.info("Libtorrent version: %s", libtorrent_version)
 
     if args.daemon:
         daemonize(args, watch)

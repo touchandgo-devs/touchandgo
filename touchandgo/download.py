@@ -1,4 +1,5 @@
 import thread
+import logging
 
 from os import system, _exit
 from os.path import join
@@ -17,8 +18,12 @@ from touchandgo.settings import DEBUG, TMP_DIR
 from touchandgo.stream_server import serve_file
 
 
+log = logging.getLogger('touchandgo.download')
+
 class DownloadManager(object):
     def __init__(self, magnet, port=None, sub_lang=None, serve=False):
+        log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s ",
+                    magnet, port, sub_lang, serve)
         self.magnet = magnet
         if port is None:
             port = 8888
@@ -47,9 +52,10 @@ class DownloadManager(object):
     def start(self):
         self.start_time = datetime.now()
         print("Downloading metadata")
+        log.info("Downloading metadata")
         while not self.handle.has_metadata():
             sleep(.1)
-        print("Starting download")
+        log.info("Starting download")
         self.session.listen_on(6881, 6891)
         self.session.start_dht()
 
@@ -74,7 +80,7 @@ class DownloadManager(object):
     def video_file(self):
         if self._video_file is None:
             self._video_file = self.get_biggest_file()
-
+        log.info("Video File: %s",self._video_file)
         return self._video_file
 
     def get_biggest_file(self):
@@ -164,6 +170,7 @@ class DownloadManager(object):
 
     def get_subtitle(self):
         print("Downloading subtitle")
+        log.info("Downloading subtitle")
         video_file = self.video_file
         filepath = join(TMP_DIR, video_file[0])
         guess = guess_video_info(filepath, info=['filename'])
@@ -175,5 +182,7 @@ class DownloadManager(object):
             subtitle = None
         else:
             subtitle = get_subtitle_path(join(TMP_DIR, video.name))
+        log.info("video_file: %s, filepath: %s, guess: %s, video: %s"
+                 "subtitle: %s",video_file,filepath,guess,video,subtitle)
         return subtitle
 

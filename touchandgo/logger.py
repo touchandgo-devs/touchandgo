@@ -11,7 +11,7 @@ def log_set_up(verbose):
     formatter = logging.Formatter("%(asctime)s  %(name)-22s  "
                                   "%(levelname)-8s %(message)s")
     handler.setFormatter(formatter)
-    logger = logging.getLogger('touchandgo')
+    logger = logging.getLogger()
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     if DEBUG:

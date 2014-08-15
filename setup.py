@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 try:
@@ -13,7 +13,7 @@ setup(
     version='0.4.1',
     author='Felipe Lerena, Nicolás Demarchi',
     description='A python app and library to watch series magically',
-    author_email='felipelerena@gmail.com',
+    author_email='felipelerena@gmail.com - mail@gilgamezh.me',
     packages=['touchandgo'],
     scripts=[],
     url='http://github.com/touchandgo-devel/touchandgo/',
