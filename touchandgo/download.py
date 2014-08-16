@@ -21,10 +21,11 @@ from touchandgo.stream_server import serve_file
 
 log = logging.getLogger('touchandgo.download')
 
+
 class DownloadManager(object):
     def __init__(self, magnet, port=None, sub_lang=None, serve=False):
         log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s ",
-                    magnet, port, sub_lang, serve)
+                 magnet, port, sub_lang, serve)
         self.magnet = magnet
         if port is None:
             port = 8888
@@ -85,7 +86,7 @@ class DownloadManager(object):
     def video_file(self):
         if self._video_file is None:
             self._video_file = self.get_biggest_file()
-        log.info("Video File: %s",self._video_file)
+        log.info("Video File: %s", self._video_file)
         return self._video_file
 
     def get_biggest_file(self):
