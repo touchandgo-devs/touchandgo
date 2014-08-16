@@ -1,4 +1,5 @@
 import thread
+import libtorrent as lt
 import logging
 
 from os import system, _exit
@@ -52,20 +53,21 @@ class DownloadManager(object):
     def init_handle(self):
         params = {
             "save_path": TMP_DIR,
-            #"allocation": "compact"
+            "allocation": lt.storage_mode_t.storage_mode_sparse,
             }
         self.session = session()
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
 
     def start(self):
         self.start_time = datetime.now()
+        self.session.listen_on(6881, 6891)
+        self.session.start_dht()
         print("Downloading metadata")
         log.info("Downloading metadata")
         while not self.handle.has_metadata():
             sleep(.1)
         log.info("Starting download")
-        self.session.listen_on(6881, 6891)
-        self.session.start_dht()
+
 
         chunks_strat = self.strategy.initial()
 
@@ -76,7 +78,7 @@ class DownloadManager(object):
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
                     self.stream_video()
-                print("\n" * 80)
+                #print("\n" * 80)
                 if DEBUG:
                     self.defrag()
                 self.stats()
@@ -127,6 +129,9 @@ class DownloadManager(object):
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
         print(numerales)
+
+
+
 
     def stats(self):
         status = self.handle.status()

@@ -11,10 +11,12 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 from os import fstat
 from os.path import join
+from time import sleep
 
 from guessit import guess_video_info
 
 from touchandgo.settings import TMP_DIR
+
 
 log = logging.getLogger('touchandgo.stream_server')
 
@@ -48,27 +50,34 @@ def serve_file(manager):
             return video_path
 
         def copy_chunk(self, in_file, out_file):
-            """
-            Copy a chunk of in_file as dictated by self.range_[from|to]
-            to out_file.
-            NB: range values are inclusive so 0-99 => 100 bytes
-            Neither of the file objects are closed when the
-            function returns.  Assumes that in_file is open
-            for reading, out_file is open for writing.
-            If range_tuple specifies something bigger/outside
-            than the size of in_file, out_file will contain as
-            much content as matches.  e.g. with a 1000 byte input,
-            (500, 2000) will create a 500 byte long file
-            (2000, 3000) will create a zero length output file
-            """
+            def get_piece_length():
+                info = manager.handle.get_torrent_info()
+                length = info.piece_length()
+                return length
+
+            def get_blocks_for_range(range_from, range_to):
+                length = get_piece_length()
+                block_from = self.range_from / length
+                block_to = self.range_to / length
+                return block_from, block_to
+
+            def is_block_available(block_number):
+                status = manager.handle.status()
+                pieces = status.pieces
+                return pieces[block_number]
 
             in_file.seek(self.range_from)
-            # Add 1 because the range is inclusive
-            left_to_copy = 1 + self.range_to - self.range_from
+            length = get_piece_length()
 
             bytes_copied = 0
-            while bytes_copied < left_to_copy:
-                read_buf = in_file.read(left_to_copy)
+            blocks = get_blocks_for_range(self.range_from, self.range_to)
+            #print "getting blocks", blocks
+            for block_number in range(blocks[0], blocks[1]+1):
+                while not is_block_available(block_number):
+                    #print "sleeping\r"
+                    sleep(0.3)
+                #print "returning block", block_number
+                read_buf = in_file.read(length)
                 if len(read_buf) == 0:
                     break
                 out_file.write(read_buf)

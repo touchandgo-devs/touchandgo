@@ -11,24 +11,22 @@ class DefaultStrategy(object):
 
         for i in range(self.piece_st):
             self.handle.piece_priority(i, 7)
-            self.handle.set_piece_deadline(i, 10000)
+            self.handle.set_piece_deadline(i, 1000)
 
-        """
         last_piece = len(status.pieces) - 1
-        for i in range(last_piece-1, last_piece+1):
+        for i in range(last_piece-4, last_piece+1):
             self.handle.piece_priority(i, 7)
-            self.handle.set_piece_deadline(i, 10000)
-        """
+            self.handle.set_piece_deadline(i, 1000)
 
         return len(status.pieces) / 25
 
     def master(self, chunks_strat):
         status = self.handle.status()
         pieces = status.pieces
-        first_n = pieces[:self.piece_st]
+        first_n = pieces[:self.piece_st] + pieces[-5:]
 
         if all(first_n):
-            self.handle.set_sequential_download(False)
+            #self.handle.set_sequential_download(False)
             pieces_strat = pieces[self.piece_st:self.piece_st + chunks_strat]
             if self.holding_stream or all(pieces_strat):
                 if not self.holding_stream:
