@@ -23,6 +23,7 @@ def get_free_port():
     socket_.close()
     return port
 
+
 def is_port_free(port):
     free = True
     socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,7 +34,6 @@ def is_port_free(port):
     socket_.close()
 
     return free
-
 
 
 def get_interface():

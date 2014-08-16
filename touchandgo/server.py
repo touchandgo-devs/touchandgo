@@ -10,9 +10,10 @@ from time import sleep
 from flask import Flask, redirect, render_template, Response
 from jinja2 import FileSystemLoader
 
-from helpers import get_interface, get_lock_diff, LOCKFILE, set_config_dir
-from history import History
-from lock import Lock
+from touchandgo.helpers import get_interface, get_lock_diff, LOCKFILE, \
+    set_config_dir
+from touchandgo.history import History
+from touchandgo.lock import Lock
 
 
 def serve(py_exec=None):
