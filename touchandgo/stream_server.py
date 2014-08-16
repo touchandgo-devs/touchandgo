@@ -109,10 +109,10 @@ def serve_file(manager):
                                 "serving complete file")
                 self.range_from = self.range_to = None
 
-            self.send_header("Accept-Ranges", "bytes")
             if self.range_from is not None or self.range_to is not None:
                 self.send_response(206)
             else:
+                self.send_header("Accept-Ranges", "bytes")
                 self.send_response(200)
             guess = guess_video_info(path, info=['filename'])
             self.send_header("Content-Type", guess['mimetype'])
