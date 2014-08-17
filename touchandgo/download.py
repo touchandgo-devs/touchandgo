@@ -70,6 +70,7 @@ class DownloadManager(object):
         while not self.handle.has_metadata():
             sleep(.1)
         log.info("Starting download")
+        self.strategy.initial()
 
         try:
             while True:
