@@ -68,7 +68,9 @@ class DownloadManager(object):
         print("Downloading metadata")
         log.info("Downloading metadata")
         while not self.handle.has_metadata():
-            sleep(.1)
+            print("\n" * 80)
+            self.stats()
+            sleep(.5)
         log.info("Starting download")
         self.strategy.initial()
 
@@ -144,8 +146,9 @@ class DownloadManager(object):
 
     def stats(self):
         status = self.handle.status()
-        print '%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % \
-            (status.progress * 100, status.download_rate / 1000,
-             status.upload_rate / 1000, status.num_peers, STATES[status.state])
+        print '%s %.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d)' % \
+            (STATES[status.state], status.progress * 1000,
+             status.download_rate / 1000, status.upload_rate / 1000,
+             status.num_peers)
         print "Elapsed Time", datetime.now() - self.start_time
 
