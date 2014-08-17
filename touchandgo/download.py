@@ -24,14 +24,15 @@ class DownloadManager(object):
     sub_downloader_class = SubtitleDownloader
 
     def __init__(self, magnet, port=None, sub_lang=None, serve=False):
-        log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s ",
-                 magnet, port, sub_lang, serve)
         self.magnet = magnet
         if port is None:
             port = 8888
         port = int(port)
         if not is_port_free(port):
             port = get_free_port()
+
+        log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s ",
+                 magnet, port, sub_lang, serve)
 
         self.port = port
         self.serve = serve
