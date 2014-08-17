@@ -64,7 +64,7 @@ def serve_file(manager):
             def is_block_available(block_number):
                 status = manager.handle.status()
                 pieces = status.pieces
-                return pieces[block_number]
+                return all(pieces[block_number:block_number+3])
 
             in_file.seek(self.range_from)
             length = get_piece_length()
@@ -72,11 +72,18 @@ def serve_file(manager):
             bytes_copied = 0
             blocks = get_blocks_for_range(self.range_from, self.range_to)
             #print "getting blocks", blocks
+            WAIT_FOR_IT = 0.3
             for block_number in range(blocks[0], blocks[1]+1):
+                if not is_block_available(block_number):
+                    #print "requesting block", block_number
+                    manager.strategy.block_requested(block_number)
+                    sleep(WAIT_FOR_IT)
+
                 while not is_block_available(block_number):
-                    #print "sleeping\r"
-                    sleep(0.3)
+                    #print "sleeping"
+                    sleep(WAIT_FOR_IT)
                 #print "returning block", block_number
+                manager.block_served(block_number)
                 read_buf = in_file.read(length)
                 if len(read_buf) == 0:
                     break

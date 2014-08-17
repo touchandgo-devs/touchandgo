@@ -41,6 +41,7 @@ class DownloadManager(object):
         # the biggest file which is supposed to be a video file
         self._video_file = None
         self.callback = serve_file
+        self._served_blocks = None
 
         self.init_handle()
         self.strategy = self.strategy_class(self)
@@ -56,6 +57,7 @@ class DownloadManager(object):
             "allocation": lt.storage_mode_t.storage_mode_sparse,
             }
         self.session = session()
+        print self.magnet
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
 
     def start(self):
@@ -68,17 +70,14 @@ class DownloadManager(object):
             sleep(.1)
         log.info("Starting download")
 
-
-        chunks_strat = self.strategy.initial()
-
         try:
             while True:
                 if not self.handle.is_seed():
-                    self.strategy.master(chunks_strat)
+                    self.strategy.master()
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
                     self.stream_video()
-                #print("\n" * 80)
+                print("\n" * 80)
                 if DEBUG:
                     self.defrag()
                 self.stats()
@@ -117,15 +116,23 @@ class DownloadManager(object):
 
     def stream(self):
         if self.callback is not None:
+            status = self.handle.status()
+            pieces = status.pieces
+            self._served_blocks = [False for i in range(len(pieces))]
             thread.start_new_thread(self.callback, (self, ))
             if not self.serve:
                 thread.start_new_thread(self.run_vlc, ())
+
+    def block_served(self, block):
+        self._served_blocks[block] = True
 
     def defrag(self):
         status = self.handle.status()
         numerales = ""
         for i, piece in enumerate(status.pieces):
             numeral = "#" if piece else " "
+            if self._served_blocks is not None and self._served_blocks[i]:
+                numeral = ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
         print(numerales)
