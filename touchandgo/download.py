@@ -80,7 +80,7 @@ class DownloadManager(object):
                     self.strategy.master()
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
-                    self.stream_video()
+                    self.stream()
                 print("\n" * 80)
                 if DEBUG:
                     self.defrag()
@@ -151,4 +151,3 @@ class DownloadManager(object):
              status.download_rate / 1000, status.upload_rate / 1000,
              status.num_peers)
         print "Elapsed Time", datetime.now() - self.start_time
-
