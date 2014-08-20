@@ -1,12 +1,13 @@
+from __future__ import division
+
 import thread
-import libtorrent as lt
 import logging
 
 from os import system, _exit
 from time import sleep
 from datetime import datetime
 
-from libtorrent import add_magnet_uri, session
+from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port
@@ -55,7 +56,7 @@ class DownloadManager(object):
     def init_handle(self):
         params = {
             "save_path": TMP_DIR,
-            "allocation": lt.storage_mode_t.storage_mode_sparse,
+            "allocation": storage_mode_t.storage_mode_sparse,
             }
         self.session = session()
         print self.magnet
@@ -147,7 +148,7 @@ class DownloadManager(object):
     def stats(self):
         status = self.handle.status()
         print '%s %.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d)' % \
-            (STATES[status.state], status.progress * 1000,
+            (STATES[status.state], status.progress * 100,
              status.download_rate / 1000, status.upload_rate / 1000,
              status.num_peers)
         print "Elapsed Time", datetime.now() - self.start_time
