@@ -11,7 +11,7 @@ from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port
-from touchandgo.settings import DEBUG, TMP_DIR
+from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT
 from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
 from touchandgo.subtitles import SubtitleDownloader
@@ -61,6 +61,7 @@ class DownloadManager(object):
         self.session = session()
         print self.magnet
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
+        self.handle.set_upload_limit(DOWNLOAD_LIMIT)
 
     def start(self):
         self.start_time = datetime.now()
