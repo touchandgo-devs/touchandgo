@@ -1,3 +1,9 @@
+import logging
+
+
+log = logging.getLogger('touchandgo.strategy')
+
+
 class DefaultStrategy(object):
     def __init__(self, manager):
         self.manager = manager
@@ -22,6 +28,7 @@ class DefaultStrategy(object):
         self.chunks_strat = len(status.pieces) / 30
 
     def block_requested(self, block_requested):
+        #log.debug("block requested %s" % block_requested)
         if not self.holding_stream:
             self.move_strategy(block_requested)
 
@@ -46,13 +53,25 @@ class DefaultStrategy(object):
             self.handle.piece_priority(i, 1)
 
     def move_strategy(self, first_block):
+        log.debug("moving strategy %s" % first_block)
         self.reset_priorities()
         self.piece_st = first_block
-        for i in range(first_block, first_block + self.chunks_strat):
+
+        self.handle.set_sequential_download(True)
+        status = self.handle.status()
+        last_piece = len(status.pieces) - 1
+
+        last_chunks = first_block + self.chunks_strat
+        if last_chunks > last_piece:
+            last_chunks = last_piece
+
+        for i in range(first_block, last_chunks):
             self.handle.piece_priority(i, 7)
             self.handle.set_piece_deadline(i, 10000)
 
-        for i in range(first_block+self.chunks_strat,
-                       first_block+self.chunks_strat*2):
+        last_chunks = first_block + self.chunks_strat * 2
+        if last_chunks > last_piece:
+            last_chunks = last_piece
+        for i in range(first_block+self.chunks_strat, last_chunks):
             self.handle.piece_priority(i, 3)
             #self.handle.set_piece_deadline(i, 20000)
