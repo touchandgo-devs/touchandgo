@@ -27,6 +27,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 class VideoHandler(SimpleHTTPRequestHandler):
     manager = None
+    _guess = None
 
     def handle_one_request(self, *args, **kwargs):
         try:
@@ -74,14 +75,14 @@ class VideoHandler(SimpleHTTPRequestHandler):
         #print "getting blocks", blocks
         for block_number in range(blocks[0], blocks[1]+1):
             if not is_block_available(block_number):
-                #print "requesting block", block_number
+                log.debug("requesting block %s" % block_number)
                 self.manager.strategy.block_requested(block_number)
                 sleep(WAIT_FOR_IT)
 
             while not is_block_available(block_number):
-                #print "sleeping"
                 sleep(WAIT_FOR_IT)
             #print "returning block", block_number
+            #log.debug("returning block %s" % block_number)
             self.manager.block_served(block_number)
             read_buf = in_file.read(length)
             if len(read_buf) == 0:
@@ -103,14 +104,12 @@ class VideoHandler(SimpleHTTPRequestHandler):
 
         """
         path = self.get_video_path()
-        print path
         try:
             # Always read in binary mode. Opening files in text mode may
             # cause newline translations, making the actual size of the
             # content transmitted *less* than the content-length!
             f = open(path, 'rb')
         except IOError:
-            print "OOPS"
             self.send_error(404, "File not found")
             return None
 
@@ -127,12 +126,16 @@ class VideoHandler(SimpleHTTPRequestHandler):
             self.range_from = self.range_to = None
 
         if self.range_from is not None or self.range_to is not None:
+            log.debug("returning 206 code")
             self.send_response(206)
         else:
             self.send_header("Accept-Ranges", "bytes")
+            log.debug("returning 200 code")
             self.send_response(200)
-        guess = guess_video_info(path, info=['filename'])
+        guess = self.guess(path)
         self.send_header("Content-Type", guess['mimetype'])
+        log.debug("mime type is %s" % guess['mimetype'])
+        log.debug("range %s to %s" % (self.range_from, self.range_to))
         if self.range_from is not None or self.range_to is not None:
             # TODO: Should also check that range is within the file size
             self.send_header("Content-Range",
@@ -157,6 +160,11 @@ class VideoHandler(SimpleHTTPRequestHandler):
         except Exception:
             pass
         self.rfile.close()
+
+    def guess(self, path):
+        if self._guess is None:
+            self._guess = guess_video_info(path, info=['filename'])
+        return self._guess
 
 
 class InvalidRangeHeader(Exception):
@@ -183,7 +191,6 @@ def parse_range_header(range_header, total_length):
     (which could either be handled as a user
     request failure, or the same as if (None, None) was returned
     """
-    # range_header = self.headers.getheader("Range")
     if range_header is None or range_header == "":
         return (None, None)
     if not range_header.startswith("bytes="):
