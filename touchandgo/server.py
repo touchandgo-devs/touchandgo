@@ -55,7 +55,7 @@ def serve(py_exec=None):
         log.debug(command)
         process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
         sleep(1)
-        while get_lock_diff() < 10:
+        while get_lock_diff() < 30:
             sleep(1)
         redirect_url = "http://%s:%s" % (interface, port)
         log.info("redirecting to %s" % redirect_url)
