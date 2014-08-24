@@ -66,19 +66,19 @@ class DownloadManager(object):
         self.handle.set_upload_limit(DOWNLOAD_LIMIT)
 
     def start(self):
-        self.start_time = datetime.now()
-        self.session.listen_on(6881, 6891)
-        self.session.start_dht()
-        print("Downloading metadata")
-        log.info("Downloading metadata")
-        while not self.handle.has_metadata():
-            print("\n" * 80)
-            self.stats()
-            sleep(.5)
-        log.info("Starting download")
-        self.strategy.initial()
-
         try:
+            self.start_time = datetime.now()
+            self.session.listen_on(6881, 6891)
+            self.session.start_dht()
+            print("Downloading metadata")
+            log.info("Downloading metadata")
+            while not self.handle.has_metadata():
+                print("\n" * 80)
+                self.stats()
+                sleep(.5)
+            log.info("Starting download")
+            self.strategy.initial()
+
             while True:
                 if not self.handle.is_seed():
                     self.strategy.master()
@@ -94,7 +94,7 @@ class DownloadManager(object):
                 self.stats()
                 sleep(1)
         except KeyboardInterrupt:
-            _exit(0)
+            return
 
     @property
     def video_file(self):
@@ -121,11 +121,11 @@ class DownloadManager(object):
             subtitle = self.subtitle.download(self.video_file)
             if subtitle is not None:
                 command += " --sub-file %s" % subtitle
-        try:
-            system(command)
-        except KeyboardInterrupt:
-            pass
-        _exit(0)
+        #try:
+        system(command)
+        #except KeyboardInterrupt:
+        #    pass
+        #_exit(0)
 
     def stream(self):
         if self.callback is not None and not self.streaming:

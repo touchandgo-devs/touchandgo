@@ -25,153 +25,151 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
         pass
 
 
-def serve_file(manager):
+class VideoHandler(SimpleHTTPRequestHandler):
+    manager = None
 
-    class VideoHandler(SimpleHTTPRequestHandler):
-        def handle_one_request(self, *args, **kwargs):
-            try:
-                return SimpleHTTPRequestHandler.handle_one_request(self, *args,
-                                                                   **kwargs)
-            except:
-                pass
+    def handle_one_request(self, *args, **kwargs):
+        try:
+            return SimpleHTTPRequestHandler.handle_one_request(self, *args,
+                                                                **kwargs)
+        except:
+            pass
 
-        def do_GET(self):
-            f = self.send_head()
-            if f:
-                if self.range_from is not None and self.range_to is not None:
-                    self.copy_chunk(f, self.wfile)
-                else:
-                    self.copyfile(f, self.wfile)
-                f.close()
+    def do_GET(self):
+        f = self.send_head()
+        if f:
+            if self.range_from is not None and self.range_to is not None:
+                self.copy_chunk(f, self.wfile)
+            else:
+                self.copyfile(f, self.wfile)
+            f.close()
 
-        def get_video_path(self):
-            video = manager.video_file
-            video_path = join(TMP_DIR, video[0])
-            return video_path
+    def get_video_path(self):
+        video = self.manager.video_file
+        video_path = join(TMP_DIR, video[0])
+        return video_path
 
-        def copy_chunk(self, in_file, out_file):
-            def get_piece_length():
-                info = manager.handle.get_torrent_info()
-                length = info.piece_length()
-                return length
+    def copy_chunk(self, in_file, out_file):
+        def get_piece_length():
+            info = self.manager.handle.get_torrent_info()
+            length = info.piece_length()
+            return length
 
-            def get_blocks_for_range(range_from, range_to):
-                length = get_piece_length()
-                block_from = self.range_from / length
-                block_to = self.range_to / length
-                return block_from, block_to
-
-            def is_block_available(block_number):
-                status = manager.handle.status()
-                pieces = status.pieces
-                return all(pieces[block_number:block_number+3])
-
-            in_file.seek(self.range_from)
+        def get_blocks_for_range(range_from, range_to):
             length = get_piece_length()
+            block_from = self.range_from / length
+            block_to = self.range_to / length
+            return block_from, block_to
 
-            bytes_copied = 0
-            blocks = get_blocks_for_range(self.range_from, self.range_to)
-            #print "getting blocks", blocks
-            for block_number in range(blocks[0], blocks[1]+1):
-                if not is_block_available(block_number):
-                    #print "requesting block", block_number
-                    manager.strategy.block_requested(block_number)
-                    sleep(WAIT_FOR_IT)
+        def is_block_available(block_number):
+            status = self.manager.handle.status()
+            pieces = status.pieces
+            return all(pieces[block_number:block_number+3])
 
-                while not is_block_available(block_number):
-                    #print "sleeping"
-                    sleep(WAIT_FOR_IT)
-                #print "returning block", block_number
-                manager.block_served(block_number)
-                read_buf = in_file.read(length)
-                if len(read_buf) == 0:
-                    break
-                out_file.write(read_buf)
-                bytes_copied += len(read_buf)
-            return bytes_copied
+        in_file.seek(self.range_from)
+        length = get_piece_length()
 
-        def send_head(self):
-            """Common code for GET and HEAD commands.
+        bytes_copied = 0
+        blocks = get_blocks_for_range(self.range_from, self.range_to)
+        #print "getting blocks", blocks
+        for block_number in range(blocks[0], blocks[1]+1):
+            if not is_block_available(block_number):
+                #print "requesting block", block_number
+                self.manager.strategy.block_requested(block_number)
+                sleep(WAIT_FOR_IT)
 
-            This sends the response code and MIME headers.
+            while not is_block_available(block_number):
+                #print "sleeping"
+                sleep(WAIT_FOR_IT)
+            #print "returning block", block_number
+            self.manager.block_served(block_number)
+            read_buf = in_file.read(length)
+            if len(read_buf) == 0:
+                break
+            out_file.write(read_buf)
+            bytes_copied += len(read_buf)
+        return bytes_copied
 
-            Return value is either a file object (which has to be copied
-            to the outputfile by the caller unless the command was HEAD,
-            and must be closed by the caller under all circumstances), or
-            None, in which case the caller has nothing further to do.
+    def send_head(self):
+        """Common code for GET and HEAD commands.
+
+        This sends the response code and MIME headers.
+
+        Return value is either a file object (which has to be copied
+        to the outputfile by the caller unless the command was HEAD,
+        and must be closed by the caller under all circumstances), or
+        None, in which case the caller has nothing further to do.
 
 
-            """
-            path = self.get_video_path()
-            print path
-            try:
-                # Always read in binary mode. Opening files in text mode may
-                # cause newline translations, making the actual size of the
-                # content transmitted *less* than the content-length!
-                f = open(path, 'rb')
-            except IOError:
-                print "OOPS"
-                self.send_error(404, "File not found")
-                return None
+        """
+        path = self.get_video_path()
+        print path
+        try:
+            # Always read in binary mode. Opening files in text mode may
+            # cause newline translations, making the actual size of the
+            # content transmitted *less* than the content-length!
+            f = open(path, 'rb')
+        except IOError:
+            print "OOPS"
+            self.send_error(404, "File not found")
+            return None
 
-            fs = fstat(f.fileno())
-            total_length = fs[6]
-            try:
-                self.range_from, self.range_to = parse_range_header(
-                    self.headers.getheader("Range"), total_length)
-            except InvalidRangeHeader:
-                # Just serve them the whole file, although it's possibly
-                # more correct to return a 4xx error?
-                log.warning("Range header parsing failed, "
-                                "serving complete file")
-                self.range_from = self.range_to = None
+        fs = fstat(f.fileno())
+        total_length = fs[6]
+        try:
+            self.range_from, self.range_to = parse_range_header(
+                self.headers.getheader("Range"), total_length)
+        except InvalidRangeHeader:
+            # Just serve them the whole file, although it's possibly
+            # more correct to return a 4xx error?
+            log.warning("Range header parsing failed, "
+                            "serving complete file")
+            self.range_from = self.range_to = None
 
-            if self.range_from is not None or self.range_to is not None:
-                self.send_response(206)
-            else:
-                self.send_header("Accept-Ranges", "bytes")
-                self.send_response(200)
-            guess = guess_video_info(path, info=['filename'])
-            self.send_header("Content-Type", guess['mimetype'])
-            if self.range_from is not None or self.range_to is not None:
-                # TODO: Should also check that range is within the file size
-                self.send_header("Content-Range",
-                                 "bytes %d-%d/%d" % (self.range_from,
-                                                     self.range_to,
-                                                     total_length))
-                # Add 1 because ranges are inclusive
-                self.send_header("Content-Length",
-                                (1 + self.range_to - self.range_from))
-            else:
-                self.send_header("Content-Length", str(total_length))
-            self.send_header("Last-Modified",
-                             self.date_time_string(fs.st_mtime))
-            self.end_headers()
-            return f
+        if self.range_from is not None or self.range_to is not None:
+            self.send_response(206)
+        else:
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_response(200)
+        guess = guess_video_info(path, info=['filename'])
+        self.send_header("Content-Type", guess['mimetype'])
+        if self.range_from is not None or self.range_to is not None:
+            # TODO: Should also check that range is within the file size
+            self.send_header("Content-Range",
+                                "bytes %d-%d/%d" % (self.range_from,
+                                                    self.range_to,
+                                                    total_length))
+            # Add 1 because ranges are inclusive
+            self.send_header("Content-Length",
+                            (1 + self.range_to - self.range_from))
+        else:
+            self.send_header("Content-Length", str(total_length))
+        self.send_header("Last-Modified",
+                            self.date_time_string(fs.st_mtime))
+        self.end_headers()
+        return f
 
-        def finish(self, *args, **kwargs):
-            try:
-                if not self.wfile.closed:
-                    self.wfile.flush()
-                    self.wfile.close()
-            except Exception:
-                pass
-            self.rfile.close()
-
-    def run(server_class=ThreadedHTTPServer,
-            handler_class=SimpleHTTPRequestHandler):
-        print("serving on http://localhost:%s" % manager.port)
-        log.info("serving on http://localhost:%s" % manager.port)
-        server_address = ('0.0.0.0', manager.port)
-        httpd = server_class(server_address, handler_class)
-        httpd.serve_forever()
-
-    run(handler_class=VideoHandler)
+    def finish(self, *args, **kwargs):
+        try:
+            if not self.wfile.closed:
+                self.wfile.flush()
+                self.wfile.close()
+        except Exception:
+            pass
+        self.rfile.close()
 
 
 class InvalidRangeHeader(Exception):
     pass
 
+
+def serve_file(manager):
+    print("serving on http://localhost:%s" % manager.port)
+    log.info("serving on http://localhost:%s" % manager.port)
+    server_address = ('0.0.0.0', manager.port)
+    httpd = ThreadedHTTPServer(server_address, VideoHandler)
+    VideoHandler.manager = manager
+    httpd.serve_forever()
 
 def parse_range_header(range_header, total_length):
     """
@@ -227,5 +225,3 @@ def parse_range_header(range_header, total_length):
     else:
         raise InvalidRangeHeader("Don't know how to parse Range: %s" %
                                  (range_header))
-
-
