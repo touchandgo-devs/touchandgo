@@ -1,2 +1,2 @@
-STATES = ['queued', 'checking', 'downloading metadata', 'downloading',
-          'finished', 'seeding', 'allocating']
+STATES = ['Queued', 'Checking', 'Downloading metadata', 'Downloading',
+          'Finished', 'Seeding', 'Allocating']
