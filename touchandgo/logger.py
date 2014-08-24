@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from logging.handlers import RotatingFileHandler
 from os import mkdir
@@ -7,7 +8,7 @@ from os.path import exists
 from touchandgo.settings import DEBUG, TMP_DIR
 
 
-def log_set_up(verbose):
+def log_set_up(verbose=False):
 
     if not exists(TMP_DIR):
         mkdir(TMP_DIR)
@@ -19,11 +20,22 @@ def log_set_up(verbose):
     handler.setFormatter(formatter)
     logger = logging.getLogger()
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    if DEBUG:
+    if DEBUG or verbose:
         logger.setLevel(logging.DEBUG)
-    if verbose:
+    else:
+        logger.setLevel(logging.INFO)
+
+
+    add_stdout_handler(logger, formatter)
+
+def add_stdout_handler(logger, formatter):
+    try:
+        from rainbow_logging_handler import RainbowLoggingHandler
+        handler = RainbowLoggingHandler(sys.stderr, color_funcName=(
+            'black', 'black', True))
+    except ImportError:
         handler = logging.StreamHandler()
-        logger.addHandler(handler)
-        handler.setFormatter(formatter)
-        logger.setLevel(logging.DEBUG)
+        pass
+
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)

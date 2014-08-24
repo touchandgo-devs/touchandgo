@@ -1,4 +1,5 @@
 import os
+import logging
 import signal
 import socket
 
@@ -9,8 +10,9 @@ from os import mkdir
 from os.path import getmtime, exists
 
 from netifaces import interfaces, ifaddresses
-
 from ojota import set_data_source
+
+from touchandgo.logger import log_set_up
 
 
 LOCKFILE = "/tmp/touchandgo"
@@ -58,6 +60,9 @@ def is_process_running(process_id):
 
 def daemonize(args, callback):
     with DaemonContext():
+        log_set_up(True)
+        log = logging.getLogger('touchandgo.daemon')
+        log.info("running daemon")
         create_process = False
         lock = Lock(LOCKFILE, os.getpid(), args.name, args.sea_ep[0],
                     args.sea_ep[1], args.port)
@@ -67,6 +72,7 @@ def daemonize(args, callback):
                                      args.sea_ep[1]) \
                     or not is_process_running(lock_pid):
                 try:
+                    log.debug("killing process %s" % lock_pid)
                     os.kill(lock_pid, signal.SIGQUIT)
                 except OSError:
                     pass
@@ -78,6 +84,7 @@ def daemonize(args, callback):
             create_process = True
 
         if create_process:
+            log.debug("creating proccess")
             lock.acquire()
             callback(args.name, season=args.sea_ep[0], episode=args.sea_ep[1],
                      serve=True, port=args.port)
