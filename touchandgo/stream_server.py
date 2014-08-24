@@ -15,7 +15,7 @@ from time import sleep
 
 from guessit import guess_video_info
 
-from touchandgo.settings import TMP_DIR
+from touchandgo.settings import TMP_DIR, WAIT_FOR_IT
 
 
 log = logging.getLogger('touchandgo.stream_server')
@@ -72,7 +72,6 @@ def serve_file(manager):
             bytes_copied = 0
             blocks = get_blocks_for_range(self.range_from, self.range_to)
             #print "getting blocks", blocks
-            WAIT_FOR_IT = 0.3
             for block_number in range(blocks[0], blocks[1]+1):
                 if not is_block_available(block_number):
                     #print "requesting block", block_number
@@ -104,12 +103,14 @@ def serve_file(manager):
 
             """
             path = self.get_video_path()
+            print path
             try:
                 # Always read in binary mode. Opening files in text mode may
                 # cause newline translations, making the actual size of the
                 # content transmitted *less* than the content-length!
                 f = open(path, 'rb')
             except IOError:
+                print "OOPS"
                 self.send_error(404, "File not found")
                 return None
 

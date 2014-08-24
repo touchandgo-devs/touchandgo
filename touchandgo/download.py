@@ -4,6 +4,7 @@ import thread
 import logging
 
 from os import system, _exit
+from os.path import join, exists
 from time import sleep
 from datetime import datetime
 
@@ -11,7 +12,8 @@ from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port
-from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT
+from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT, WAIT_FOR_IT, \
+    DEFAULT_PORT
 from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
 from touchandgo.subtitles import SubtitleDownloader
@@ -27,7 +29,7 @@ class DownloadManager(object):
     def __init__(self, magnet, port=None, sub_lang=None, serve=False):
         self.magnet = magnet
         if port is None:
-            port = 8888
+            port = DEFAULT_PORT
         port = int(port)
         if not is_port_free(port):
             port = get_free_port()
@@ -44,6 +46,7 @@ class DownloadManager(object):
         self._video_file = None
         self.callback = serve_file
         self._served_blocks = None
+        self.streaming = False
 
         self.init_handle()
         self.strategy = self.strategy_class(self)
@@ -59,7 +62,6 @@ class DownloadManager(object):
             "allocation": storage_mode_t.storage_mode_sparse,
             }
         self.session = session()
-        print self.magnet
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
         self.handle.set_upload_limit(DOWNLOAD_LIMIT)
 
@@ -82,7 +84,10 @@ class DownloadManager(object):
                     self.strategy.master()
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
+
+                if not self.streaming and self.handle.status().state == 3:
                     self.stream()
+
                 print("\n" * 80)
                 if DEBUG:
                     self.defrag()
@@ -109,6 +114,8 @@ class DownloadManager(object):
         return biggest_file
 
     def run_vlc(self):
+        while not exists(join(TMP_DIR, self.video_file[0])):
+            sleep(WAIT_FOR_IT)
         command = "vlc http://localhost:%s -q" % self.port
         if self.subtitle is not None:
             subtitle = self.subtitle.download(self.video_file)
@@ -121,7 +128,8 @@ class DownloadManager(object):
         _exit(0)
 
     def stream(self):
-        if self.callback is not None:
+        if self.callback is not None and not self.streaming:
+            self.streaming = True
             status = self.handle.status()
             pieces = status.pieces
             self._served_blocks = [False for i in range(len(pieces))]
