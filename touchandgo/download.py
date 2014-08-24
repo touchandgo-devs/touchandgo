@@ -1,5 +1,7 @@
+#! /usr/bin/env python2
 from __future__ import division
 
+import argparse
 import thread
 import logging
 
@@ -12,6 +14,7 @@ from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port
+from touchandgo.logger import log_set_up
 from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT, WAIT_FOR_IT, \
     DEFAULT_PORT
 from touchandgo.strategy import DefaultStrategy
@@ -100,7 +103,7 @@ class DownloadManager(object):
     def video_file(self):
         if self._video_file is None:
             self._video_file = self.get_biggest_file()
-        log.info("Video File: %s", self._video_file)
+            log.info("Video File: %s", self._video_file)
         return self._video_file
 
     def get_biggest_file(self):
@@ -161,3 +164,21 @@ class DownloadManager(object):
              status.download_rate / 1000, status.upload_rate / 1000,
              status.num_peers)
         print "Elapsed Time", datetime.now() - self.start_time
+
+def main():
+    log_set_up()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("magnet", nargs='?', default=None)
+    parser.add_argument("--sub", nargs='?', default=None)
+    parser.add_argument("--serve", action="store_true")
+    parser.add_argument("--port", "-p", default="8888")
+
+    args = parser.parse_args()
+
+    manager = DownloadManager(args.magnet, port=args.port, serve=args.serve,
+                              sub_lang=args.sub)
+    manager.start()
+
+if __name__ == "__main__":
+    main()
