@@ -176,6 +176,7 @@ def serve_file(manager):
     log.info("serving on http://localhost:%s" % manager.port)
     server_address = ('0.0.0.0', manager.port)
     httpd = ThreadedHTTPServer(server_address, VideoHandler)
+    manager.httpd = httpd
     VideoHandler.manager = manager
     httpd.serve_forever()
 
