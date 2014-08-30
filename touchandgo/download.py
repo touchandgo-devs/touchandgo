@@ -102,13 +102,8 @@ class DownloadManager(object):
                 print self.stats(DEBUG)
                 sleep(1)
         except KeyboardInterrupt:
-            print "INTERRUPT"
             if self.httpd is not None:
-                print dir(self.httpd)
                 self.httpd.shutdown()
-            print self.player_th
-            print self.httpd
-            print self.stream_th
             raise KeyboardInterrupt
 
     @property
