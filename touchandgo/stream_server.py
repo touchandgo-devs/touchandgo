@@ -181,6 +181,7 @@ def serve_file(manager):
     VideoHandler.manager = manager
     httpd.serve_forever()
 
+
 def parse_range_header(range_header, total_length):
     """
     Return a 2-element tuple containing the requested range offsets

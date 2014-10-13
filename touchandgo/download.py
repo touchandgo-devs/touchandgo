@@ -73,6 +73,7 @@ class DownloadManager(object):
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
         self.handle.set_upload_limit(DOWNLOAD_LIMIT)
 
+    @property
     def status(self):
         return self.handle.status()
 
@@ -96,7 +97,7 @@ class DownloadManager(object):
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
 
-                if not self.streaming and self.status().state == 3:
+                if not self.streaming and self.status.state == 3:
                     self.stream()
 
                 print("\n" * 80)
@@ -141,7 +142,7 @@ class DownloadManager(object):
     def stream(self):
         if self.callback is not None and not self.streaming:
             self.streaming = True
-            pieces = self.status().pieces
+            pieces = self.status.pieces
             self._served_blocks = [False for i in range(len(pieces))]
             self.stream_th = thread.start_new_thread(self.callback, (self, ))
             if not self.serve:
@@ -152,7 +153,7 @@ class DownloadManager(object):
 
     def defrag(self):
         numerales = ""
-        pieces = self.status().pieces
+        pieces = self.status.pieces
         for i, piece in enumerate(pieces):
             numeral = "#" if piece else " "
             if self._served_blocks is not None and self._served_blocks[i]:
@@ -162,7 +163,7 @@ class DownloadManager(object):
         return "%s\n" % numerales
 
     def stats(self, defrag=False):
-        status = self.status()
+        status = self.status
         text = ""
         if self._video_file is not None:
             text += "Serving %s on http://localhost:%s\n" % (self.video_file[0],

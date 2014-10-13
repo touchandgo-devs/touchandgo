@@ -11,6 +11,7 @@ class DefaultStrategy(object):
         self.holding_stream = True
         self.handle = manager.handle
         self.chunks_strat = 10
+        self.last_pieces_count = 5
 
     def initial(self):
         self.handle.set_sequential_download(True)
@@ -20,8 +21,8 @@ class DefaultStrategy(object):
         #    self.handle.piece_priority(i, 7)
         #    self.handle.set_piece_deadline(i, 3000)
 
-        last_piece = len(status.pieces) - 1
-        for i in range(last_piece-4, last_piece+1):
+        last_piece = len(status.pieces)
+        for i in range(last_piece-self.last_pieces_count, last_piece):
             self.handle.piece_priority(i, 7)
             self.handle.set_piece_deadline(i, 1000)
 
