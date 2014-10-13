@@ -19,7 +19,7 @@ log = logging.getLogger('touchandgo.main')
 
 class SearchAndStream(object):
     def __init__(self, name, season=None, episode=None, sub_lang=None,
-                 serve=False, quality=None, port=None):
+                 serve=False, quality=None, port=None, cast=False):
         self.name = name
         self.season = season
         self.episode = episode
@@ -27,13 +27,14 @@ class SearchAndStream(object):
         self.serve = serve
         self.quality = quality
         self.port = port
+        self.do_cast = cast
 
     def download(self, results):
         log.info("Processing magnet link")
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
         manager = DownloadManager(magnet, port=self.port, serve=self.serve,
-                                  sub_lang=self.sub_lang)
+                                  sub_lang=self.sub_lang, cast=self.do_cast)
         manager.start()
         set_config_dir()
 
@@ -82,6 +83,7 @@ def main():
     parser.add_argument("--port", "-p", default="8888")
     parser.add_argument("--season", action="store_true")
     parser.add_argument("--verbose", action="store_true", default=None)
+    parser.add_argument("--cast", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -94,7 +96,7 @@ def main():
     touchandgo = SearchAndStream(args.name, season=args.sea_ep[0],
                                  episode=episode, sub_lang=args.sub,
                                  serve=args.serve, quality=args.quality,
-                                 port=args.port)
+                                 port=args.port, cast=args.cast)
     if args.daemon:
         daemonize(args, touchandgo.watch)
     else:

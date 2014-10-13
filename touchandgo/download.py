@@ -14,7 +14,7 @@ from datetime import datetime
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
-from touchandgo.helpers import is_port_free, get_free_port
+from touchandgo.helpers import is_port_free, get_free_port, get_interface
 from touchandgo.logger import log_set_up
 from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT, WAIT_FOR_IT, \
     DEFAULT_PORT
@@ -30,7 +30,8 @@ class DownloadManager(object):
     strategy_class = DefaultStrategy
     sub_downloader_class = SubtitleDownloader
 
-    def __init__(self, magnet, port=None, sub_lang=None, serve=False):
+    def __init__(self, magnet, port=None, sub_lang=None, serve=False,
+                 cast=False):
         self.magnet = magnet
         if port is None:
             port = DEFAULT_PORT
@@ -43,6 +44,7 @@ class DownloadManager(object):
 
         self.port = port
         self.serve = serve
+        self.do_cast = cast
 
         # number of pieces to wait until start streaming
         # we are waiting untill all the first peices are downloaded
@@ -139,6 +141,14 @@ class DownloadManager(object):
             log.debug("Closing VLC")
         _exit(0)
 
+    def cast(self):
+        import pychromecast
+
+        self.chromecast = pychromecast.get_chromecast()
+        interface = get_interface()
+        self.chromecast.play_media("http://%s:%s" % (interface, self.port),
+                              "video/mp4")
+
     def stream(self):
         if self.callback is not None and not self.streaming:
             self.streaming = True
@@ -147,6 +157,8 @@ class DownloadManager(object):
             self.stream_th = thread.start_new_thread(self.callback, (self, ))
             if not self.serve:
                 self.player_th = thread.start_new_thread(self.run_vlc, ())
+            if self.do_cast:
+                self.cast_th = thread.start_new_thread(self.cast, ())
 
     def block_served(self, block):
         self._served_blocks[block] = True
@@ -177,6 +189,10 @@ class DownloadManager(object):
              status.num_peers)
         text += "Elapsed Time %s" % (datetime.now() - self.start_time)
         return text
+
+    def __del__(self):
+        if self.do_cast:
+            self.chromecast.media_controller.stop()
 
 
 def main():
