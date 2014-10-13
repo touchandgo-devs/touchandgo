@@ -3,10 +3,11 @@ import argparse
 import logging
 import sys
 
+from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
-from libtorrent import version as libtorrent_version
 
+from libtorrent import version as libtorrent_version
 from touchandgo.helpers import daemonize, set_config_dir
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
@@ -42,12 +43,16 @@ class SearchAndStream(object):
         history.update()
 
     def watch(self):
-        if self.name[:6] == 'magnet':
-            results = {'magnet': self.name}
-            print results
-            self.download(results)
-        else:
-            self.search_magnet()
+        try:
+            if self.name[:6] == 'magnet':
+                results = {'magnet': self.name}
+                print results
+                self.download(results)
+            else:
+                self.search_magnet()
+        except KeyboardInterrupt:
+            log.info("Thanks for using Touchandgo")
+            _exit(0)
 
     def search_magnet(self):
         log.info("Searching torrent")

@@ -19,6 +19,7 @@ from touchandgo.settings import TMP_DIR, WAIT_FOR_IT
 
 
 log = logging.getLogger('touchandgo.stream_server')
+_guess = None
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -27,7 +28,6 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 class VideoHandler(SimpleHTTPRequestHandler):
     manager = None
-    _guess = None
 
     def handle_one_request(self, *args, **kwargs):
         try:
@@ -162,9 +162,10 @@ class VideoHandler(SimpleHTTPRequestHandler):
         self.rfile.close()
 
     def guess(self, path):
-        if self._guess is None:
-            self._guess = guess_video_info(path, info=['filename'])
-        return self._guess
+        global _guess
+        if _guess is None:
+            _guess = guess_video_info(path, info=['filename'])
+        return _guess
 
 
 class InvalidRangeHeader(Exception):

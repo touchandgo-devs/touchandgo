@@ -6,6 +6,7 @@ import thread
 import logging
 
 from os import system
+from os import _exit
 from os.path import join, exists
 from time import sleep
 from datetime import datetime
@@ -134,8 +135,8 @@ class DownloadManager(object):
         try:
             system(command)
         except KeyboardInterrupt:
-            exit(0)
-            raise KeyboardInterrupt
+            log.debug("Closing VLC")
+        _exit(0)
 
     def stream(self):
         if self.callback is not None and not self.streaming:
