@@ -88,22 +88,22 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print("\n" * 80)
-                print self.stats()
                 sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
 
             while True:
-                if not self.handle.is_seed():
+                is_seed = self.handle.is_seed()
+                if not is_seed:
                     self.strategy.master()
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
 
-                if not self.streaming and self.status.state == 3:
+                if not self.streaming and is_seed:
                     self.stream()
 
                 print("\n" * 80)
-                print self.stats(DEBUG)
+                print(self.stats(DEBUG))
                 sleep(1)
         except KeyboardInterrupt:
             if self.httpd is not None:
