@@ -66,7 +66,6 @@ def daemonize(args, callback):
         create_process = False
         lock = Lock(LOCKFILE, os.getpid(), args.name, args.sea_ep[0],
                     args.sea_ep[1], args.port)
-        log.debug(args)
         if lock.is_locked():
             lock_pid = lock.get_pid()
             if not lock.is_same_file(args.name, args.sea_ep[0],
