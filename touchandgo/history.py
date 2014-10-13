@@ -8,4 +8,5 @@ class History(Ojota):
 
     @property
     def next(self):
-        return int(self.episode) + 1
+        if self.episode is not None:
+            return int(self.episode) + 1

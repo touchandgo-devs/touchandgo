@@ -66,6 +66,7 @@ def daemonize(args, callback):
         create_process = False
         lock = Lock(LOCKFILE, os.getpid(), args.name, args.sea_ep[0],
                     args.sea_ep[1], args.port)
+        log.debug(args)
         if lock.is_locked():
             lock_pid = lock.get_pid()
             if not lock.is_same_file(args.name, args.sea_ep[0],
@@ -86,8 +87,7 @@ def daemonize(args, callback):
         if create_process:
             log.debug("creating proccess")
             lock.acquire()
-            callback(args.name, season=args.sea_ep[0], episode=args.sea_ep[1],
-                     serve=True, port=args.port)
+            callback()
             lock.release()
 
 

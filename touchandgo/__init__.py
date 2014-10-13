@@ -47,7 +47,6 @@ class SearchAndStream(object):
         try:
             if self.name[:6] == 'magnet':
                 results = {'magnet': self.name}
-                print results
                 self.download(results)
             else:
                 self.search_magnet()
@@ -72,18 +71,28 @@ class SearchAndStream(object):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("name")
+    parser = argparse.ArgumentParser(
+        description="Command line tool to watch torrents")
+    parser.add_argument("name", help="The name of the series or movie")
 
-    parser.add_argument("sea_ep", nargs='*', default=[None, None])
-    parser.add_argument("--sub", nargs='?', default=None)
-    parser.add_argument("--serve", action="store_true")
-    parser.add_argument("--quality", nargs='?', default=None)
-    parser.add_argument("--daemon", action="store_true")
-    parser.add_argument("--port", "-p", default="8888")
-    parser.add_argument("--season", action="store_true")
-    parser.add_argument("--verbose", action="store_true", default=None)
-    parser.add_argument("--cast", action="store_true", default=False)
+    parser.add_argument("sea_ep", nargs='*', default=[None, None],
+                        help="Season and episode in the '1 24' format")
+    parser.add_argument("--sub", nargs='?', default=None,
+                        help="Subtitle language")
+    parser.add_argument("--serve", action="store_true",
+                        help="Do not run VLC")
+    parser.add_argument("--quality", nargs='?', default=None,
+                        help="quality of the video [normal|hd|fullhd]")
+    parser.add_argument("--daemon", action="store_true",
+                        help="Daemonize the process"),
+    parser.add_argument("--port", "-p", default="8888",
+                        help="The port where the stream will be served")
+    parser.add_argument("--season", action="store_true",
+                        help="Stream next episode when this episode finishes")
+    parser.add_argument("--verbose", action="store_true", default=None,
+                        help="Show _all_ the logs")
+    parser.add_argument("--cast", action="store_true", default=False,
+                        help="Stream to Google Chromecast")
 
     args = parser.parse_args()
 
@@ -98,7 +107,10 @@ def main():
                                  serve=args.serve, quality=args.quality,
                                  port=args.port, cast=args.cast)
     if args.daemon:
-        daemonize(args, touchandgo.watch)
+        def callback():
+            touchandgo.serve = True
+            touchandgo.watch()
+        daemonize(args, callback)
     else:
         play_next_episode = True
         while play_next_episode:

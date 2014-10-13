@@ -155,7 +155,7 @@ class DownloadManager(object):
             pieces = self.status.pieces
             self._served_blocks = [False for i in range(len(pieces))]
             self.stream_th = thread.start_new_thread(self.callback, (self, ))
-            if not self.serve:
+            if not self.serve and not self.do_cast:
                 self.player_th = thread.start_new_thread(self.run_vlc, ())
             if self.do_cast:
                 self.cast_th = thread.start_new_thread(self.cast, ())
