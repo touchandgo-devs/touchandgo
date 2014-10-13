@@ -31,6 +31,6 @@ setup(
                             'tsproxy = touchandgo.server:serve']
     },
     package_data={
-        'touchandgo/templates': ['*'],
+        'touchandgo': ['templates/*'],
     },
 )
