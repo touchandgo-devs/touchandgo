@@ -5,7 +5,8 @@ import argparse
 import thread
 import logging
 
-from os import system, _exit
+from os import system
+from os import _exit
 from os.path import join, exists
 from time import sleep
 from datetime import datetime
@@ -51,6 +52,10 @@ class DownloadManager(object):
         self._served_blocks = None
         self.streaming = False
 
+        self.stream_th = None
+        self.player_th = None
+        self.httpd = None
+
         self.init_handle()
         self.strategy = self.strategy_class(self)
 
@@ -68,6 +73,10 @@ class DownloadManager(object):
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
         self.handle.set_upload_limit(DOWNLOAD_LIMIT)
 
+    @property
+    def status(self):
+        return self.handle.status()
+
     def start(self):
         try:
             self.start_time = datetime.now()
@@ -77,7 +86,7 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print("\n" * 80)
-                self.stats()
+                print self.stats()
                 sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
@@ -88,16 +97,16 @@ class DownloadManager(object):
                 elif self.strategy.holding_stream:
                     self.strategy.holding_stream = False
 
-                if not self.streaming and self.handle.status().state == 3:
+                if not self.streaming and self.status.state == 3:
                     self.stream()
 
                 print("\n" * 80)
-                if DEBUG:
-                    self.defrag()
-                self.stats()
+                print self.stats(DEBUG)
                 sleep(1)
         except KeyboardInterrupt:
-            return
+            if self.httpd is not None:
+                self.httpd.shutdown()
+            raise KeyboardInterrupt
 
     @property
     def video_file(self):
@@ -124,46 +133,51 @@ class DownloadManager(object):
             subtitle = self.subtitle.download(self.video_file)
             if subtitle is not None:
                 command += " --sub-file %s" % subtitle
-        #try:
-        system(command)
-        #except KeyboardInterrupt:
-        #    pass
-        #_exit(0)
+        try:
+            system(command)
+        except KeyboardInterrupt:
+            log.debug("Closing VLC")
+        _exit(0)
 
     def stream(self):
         if self.callback is not None and not self.streaming:
             self.streaming = True
-            status = self.handle.status()
-            pieces = status.pieces
+            pieces = self.status.pieces
             self._served_blocks = [False for i in range(len(pieces))]
-            thread.start_new_thread(self.callback, (self, ))
+            self.stream_th = thread.start_new_thread(self.callback, (self, ))
             if not self.serve:
-                thread.start_new_thread(self.run_vlc, ())
+                self.player_th = thread.start_new_thread(self.run_vlc, ())
 
     def block_served(self, block):
         self._served_blocks[block] = True
 
     def defrag(self):
-        status = self.handle.status()
         numerales = ""
-        for i, piece in enumerate(status.pieces):
+        pieces = self.status.pieces
+        for i, piece in enumerate(pieces):
             numeral = "#" if piece else " "
             if self._served_blocks is not None and self._served_blocks[i]:
                 numeral = ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
-        print(numerales)
+        return "%s\n" % numerales
 
-
-
-
-    def stats(self):
-        status = self.handle.status()
-        print '%s %.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d)' % \
-            (STATES[status.state], status.progress * 100,
-             status.download_rate / 1000, status.upload_rate / 1000,
+    def stats(self, defrag=False):
+        status = self.status
+        text = ""
+        if self._video_file is not None:
+            text += "Serving %s on http://localhost:%s\n" % (self.video_file[0],
+                                                             self.port)
+        if defrag:
+            text += self.defrag()
+        text += '%s %.2f%% complete ' % (STATES[status.state],
+                                         status.progress * 100)
+        text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
+            (status.download_rate / 1000, status.upload_rate / 1000,
              status.num_peers)
-        print "Elapsed Time", datetime.now() - self.start_time
+        text += "Elapsed Time %s" % (datetime.now() - self.start_time)
+        return text
+
 
 def main():
     log_set_up()

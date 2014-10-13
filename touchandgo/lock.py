@@ -14,7 +14,6 @@ class Lock(FileLock):
         FileLock.acquire(self, *args, **kwargs)
         self._write_data()
 
-
     def _write_data(self):
         file_ = open('%s.lock' % self.path, 'w')
         season = self.season if self.season is not None else ""

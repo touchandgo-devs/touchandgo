@@ -3,48 +3,71 @@ import argparse
 import logging
 import sys
 
+from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
-from libtorrent import version as libtorrent_version
 
+from libtorrent import version as libtorrent_version
 from touchandgo.helpers import daemonize, set_config_dir
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
 from touchandgo.logger import log_set_up
 
+
 log = logging.getLogger('touchandgo.main')
 
 
-def watch(name, season=None, episode=None, sub_lang=None, serve=False,
-          quality=None, port=None):
+class SearchAndStream(object):
+    def __init__(self, name, season=None, episode=None, sub_lang=None,
+                 serve=False, quality=None, port=None):
+        self.name = name
+        self.season = season
+        self.episode = episode
+        self.sub_lang = sub_lang
+        self.serve = serve
+        self.quality = quality
+        self.port = port
 
-    def get_magnet(results):
-        print("Processing magnet link")
+    def download(self, results):
         log.info("Processing magnet link")
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
-        manager = DownloadManager(magnet, port=port, serve=serve,
-                                  sub_lang=sub_lang)
+        manager = DownloadManager(magnet, port=self.port, serve=self.serve,
+                                  sub_lang=self.sub_lang)
         manager.start()
         set_config_dir()
 
-        history = History(date=int(time()), name=name, season=season,
-                          episode=episode)
+        history = History(date=int(time()), name=self.name, season=self.season,
+                          episode=self.episode)
         history.save()
         history.update()
 
-    print("Searching torrent")
-    log.info("Searching torrent")
-    search = TorrentMediaSearcher
-    if season is None and episode is None:
-        search.request_movie_magnet('torrentproject', name,
-                                    callback=get_magnet, quality=quality)
-    else:
-        if quality is None:
-            quality = 'normal'
-        search.request_tv_magnet(provider='eztv', show=name,
-                                 season=int(season), episode=int(episode),
-                                 quality=quality, callback=get_magnet)
+    def watch(self):
+        try:
+            if self.name[:6] == 'magnet':
+                results = {'magnet': self.name}
+                print results
+                self.download(results)
+            else:
+                self.search_magnet()
+        except KeyboardInterrupt:
+            log.info("Thanks for using Touchandgo")
+            _exit(0)
+
+    def search_magnet(self):
+        log.info("Searching torrent")
+        search = TorrentMediaSearcher
+        if self.season is None and self.episode is None:
+            search.request_movie_magnet('torrentproject', self.name,
+                                        callback=self.download,
+                                        quality=self.quality)
+        else:
+            if self.quality is None:
+                quality = 'normal'
+            search.request_tv_magnet(provider='eztv', show=self.name,
+                                     season=int(self.season),
+                                     episode=int(self.episode),
+                                     quality=quality, callback=self.download)
 
 
 def main():
@@ -67,16 +90,18 @@ def main():
     log.info("Running Python %s on %r", sys.version_info, sys.platform)
     log.info("Libtorrent version: %s", libtorrent_version)
 
+    episode = int(args.sea_ep[1]) if args.sea_ep[1] is not None else None
+    touchandgo = SearchAndStream(args.name, season=args.sea_ep[0],
+                                 episode=episode, sub_lang=args.sub,
+                                 serve=args.serve, quality=args.quality,
+                                 port=args.port)
     if args.daemon:
-        daemonize(args, watch)
+        daemonize(args, touchandgo.watch)
     else:
-        episode = int(args.sea_ep[1]) if args.sea_ep[1] is not None else None
         play_next_episode = True
         while play_next_episode:
-            watch(args.name, season=args.sea_ep[0], episode=episode,
-                  sub_lang=args.sub, serve=args.serve, quality=args.quality,
-                  port=args.port)
-            episode += 1
+            touchandgo.watch()
+            touchandgo.episode += 1
             play_next_episode = args.season
 
 if __name__ == '__main__':

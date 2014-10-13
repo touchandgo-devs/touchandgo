@@ -9,7 +9,6 @@ from touchandgo.settings import DEBUG, TMP_DIR
 
 
 def log_set_up(verbose=False):
-
     if not exists(TMP_DIR):
         mkdir(TMP_DIR)
 
@@ -25,8 +24,8 @@ def log_set_up(verbose=False):
     else:
         logger.setLevel(logging.INFO)
 
-
     add_stdout_handler(logger, formatter)
+
 
 def add_stdout_handler(logger, formatter):
     try:
