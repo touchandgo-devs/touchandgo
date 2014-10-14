@@ -64,6 +64,8 @@ class SearchAndStream(object):
         else:
             if self.quality is None:
                 quality = 'normal'
+            else:
+                quality = self.quality
             search.request_tv_magnet(provider='eztv', show=self.name,
                                      season=int(self.season),
                                      episode=int(self.episode),
