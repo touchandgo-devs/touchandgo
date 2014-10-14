@@ -11,6 +11,7 @@ from os.path import join, exists
 from time import sleep
 from datetime import datetime
 
+from guessit import guess_video_info
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
@@ -57,6 +58,7 @@ class DownloadManager(object):
         self.stream_th = None
         self.player_th = None
         self.httpd = None
+        self._guess = None
 
         self.init_handle()
         self.strategy = self.strategy_class(self)
@@ -146,8 +148,9 @@ class DownloadManager(object):
 
         self.chromecast = pychromecast.get_chromecast()
         interface = get_interface()
+        guess = self.guess(self.get_video_path())
         self.chromecast.play_media("http://%s:%s" % (interface, self.port),
-                              "video/mp4")
+                                   guess['mimetype'])
 
     def stream(self):
         if self.callback is not None and not self.streaming:
@@ -189,6 +192,16 @@ class DownloadManager(object):
              status.num_peers)
         text += "Elapsed Time %s" % (datetime.now() - self.start_time)
         return text
+
+    def get_video_path(self):
+        video = self.video_file
+        video_path = join(TMP_DIR, video[0])
+        return video_path
+
+    def guess(self, path):
+        if self._guess is None:
+            self._guess = guess_video_info(path, info=['filename'])
+        return self._guess
 
     def __del__(self):
         if self.do_cast:

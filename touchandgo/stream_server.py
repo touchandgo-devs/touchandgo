@@ -10,12 +10,9 @@ from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 from os import fstat
-from os.path import join
 from time import sleep
 
-from guessit import guess_video_info
-
-from touchandgo.settings import TMP_DIR, WAIT_FOR_IT
+from touchandgo.settings import WAIT_FOR_IT
 
 
 log = logging.getLogger('touchandgo.stream_server')
@@ -44,11 +41,6 @@ class VideoHandler(SimpleHTTPRequestHandler):
             else:
                 self.copyfile(f, self.wfile)
             f.close()
-
-    def get_video_path(self):
-        video = self.manager.video_file
-        video_path = join(TMP_DIR, video[0])
-        return video_path
 
     def copy_chunk(self, in_file, out_file):
         def get_piece_length():
@@ -103,7 +95,7 @@ class VideoHandler(SimpleHTTPRequestHandler):
 
 
         """
-        path = self.get_video_path()
+        path = self.manager.get_video_path()
         try:
             # Always read in binary mode. Opening files in text mode may
             # cause newline translations, making the actual size of the
@@ -132,7 +124,7 @@ class VideoHandler(SimpleHTTPRequestHandler):
             self.send_header("Accept-Ranges", "bytes")
             log.debug("returning 200 code")
             self.send_response(200)
-        guess = self.guess(path)
+        guess = self.manager.guess(path)
         self.send_header("Content-Type", guess['mimetype'])
         log.debug("mime type is %s" % guess['mimetype'])
         log.debug("range %s to %s" % (self.range_from, self.range_to))
@@ -161,11 +153,6 @@ class VideoHandler(SimpleHTTPRequestHandler):
             pass
         self.rfile.close()
 
-    def guess(self, path):
-        global _guess
-        if _guess is None:
-            _guess = guess_video_info(path, info=['filename'])
-        return _guess
 
 
 class InvalidRangeHeader(Exception):
