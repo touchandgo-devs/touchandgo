@@ -37,7 +37,7 @@ class DefaultStrategy(object):
         last_piece = len(status.pieces)
         first_n = pieces[:self.piece_st]
         if self.download_lasts:
-            last_n = pieces[-self.piece_st:]
+            last_n = pieces[-self.last_piece_st:]
         else:
             last_n = []
 
