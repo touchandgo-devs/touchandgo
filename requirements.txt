@@ -25,3 +25,4 @@ simplejson==3.6.2
 six==1.7.3
 subliminal==0.7.4
 wsgiref==0.1.2
+qtfaststart==1.8
