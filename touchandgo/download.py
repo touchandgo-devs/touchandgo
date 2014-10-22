@@ -90,6 +90,7 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print("\n" * 80)
+                print(self.stats(DEBUG))
                 sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
@@ -167,11 +168,15 @@ class DownloadManager(object):
         self._served_blocks[block] = True
 
     def defrag(self):
+        downloading = [piece['piece_index'] for piece in
+                       self.handle.get_download_queue()]
         numerales = ""
         pieces = self.status.pieces
         for i, piece in enumerate(pieces):
             numeral = "#" if piece else " "
-            if self._served_blocks is not None and self._served_blocks[i]:
+            if i in downloading:
+                numeral = "v"
+            elif self._served_blocks is not None and self._served_blocks[i]:
                 numeral = ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
