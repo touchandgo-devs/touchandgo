@@ -40,3 +40,16 @@ In your video player open http://<server address>:5000/crisis/1/5
 
 just enjoy it.
 
+Touchandgo in action with debug
+-------------------------------
+If you run Touchandgo in debug mode (with --verbose), 
+You will see this (see the screenshot)that we call"defrag". 
+Defrag shows the current pieces status.
+
+.. image:: ./screenshots/touchandgo.png
+
+* The number shows the piece priority. 1 is the lowest and 7 the highest.
+* v means that the piece is downloading.
+* # means that the piece is downloaded.
+* > means that the piece was served by http.
+
