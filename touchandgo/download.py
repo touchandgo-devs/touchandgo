@@ -32,7 +32,7 @@ class DownloadManager(object):
     sub_downloader_class = SubtitleDownloader
 
     def __init__(self, magnet, port=None, sub_lang=None, serve=False,
-                 cast=False):
+                 cast=False, player=None):
         self.magnet = magnet
         if port is None:
             port = DEFAULT_PORT
@@ -40,12 +40,14 @@ class DownloadManager(object):
         if not is_port_free(port):
             port = get_free_port()
 
-        log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s ",
-                 magnet, port, sub_lang, serve)
+        log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s "
+                 "[Cast]: %s [Player] %s ",
+                 magnet, port, sub_lang, serve, cast, player)
 
         self.port = port
         self.serve = serve
         self.do_cast = cast
+        self.player = player
 
         # number of pieces to wait until start streaming
         # we are waiting untill all the first peices are downloaded
@@ -90,7 +92,7 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print("\n" * 80)
-                print self.stats()
+                print(self.stats(DEBUG))
                 sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
@@ -130,18 +132,27 @@ class DownloadManager(object):
 
         return biggest_file
 
-    def run_vlc(self):
+    def run_player(self):
         while not exists(join(TMP_DIR, self.video_file[0])):
             sleep(WAIT_FOR_IT)
-        command = "vlc http://localhost:%s -q" % self.port
-        if self.subtitle is not None:
-            subtitle = self.subtitle.download(self.video_file)
-            if subtitle is not None:
-                command += " --sub-file %s" % subtitle
+        if self.player == 'omxplayer':
+            command = ("omxplayer --live --timeout 360 -p -o hdmi "
+                       "http://localhost:%s" % self.port)
+            if self.subtitle is not None:
+                subtitle = self.subtitle.download(self.video_file)
+                if subtitle is not None:
+                    command += " --subtitle %s" % subtitle
+        else:
+            command = "vlc http://localhost:%s -q" % self.port
+            if self.subtitle is not None:
+                subtitle = self.subtitle.download(self.video_file)
+                if subtitle is not None:
+                    command += " --sub-file %s" % subtitle
         try:
+            log.info("Player command: %s", command)
             system(command)
         except KeyboardInterrupt:
-            log.debug("Closing VLC")
+            log.debug("Closing %s", self.player)
         _exit(0)
 
     def cast(self):
@@ -160,7 +171,7 @@ class DownloadManager(object):
             self._served_blocks = [False for i in range(len(pieces))]
             self.stream_th = thread.start_new_thread(self.callback, (self, ))
             if not self.serve and not self.do_cast:
-                self.player_th = thread.start_new_thread(self.run_vlc, ())
+                self.player_th = thread.start_new_thread(self.run_player, ())
             if self.do_cast:
                 self.cast_th = thread.start_new_thread(self.cast, ())
 
@@ -168,11 +179,15 @@ class DownloadManager(object):
         self._served_blocks[block] = True
 
     def defrag(self):
+        downloading = [piece['piece_index'] for piece in
+                       self.handle.get_download_queue()]
         numerales = ""
         pieces = self.status.pieces
         for i, piece in enumerate(pieces):
             numeral = "#" if piece else " "
-            if self._served_blocks is not None and self._served_blocks[i]:
+            if i in downloading:
+                numeral = "v"
+            elif self._served_blocks is not None and self._served_blocks[i]:
                 numeral = ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral

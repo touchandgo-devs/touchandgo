@@ -19,7 +19,8 @@ log = logging.getLogger('touchandgo.main')
 
 class SearchAndStream(object):
     def __init__(self, name, season=None, episode=None, sub_lang=None,
-                 serve=False, quality=None, port=None, cast=False):
+                 serve=False, quality=None, port=None, cast=False,
+                 player=None):
         self.name = name
         self.season = season
         self.episode = episode
@@ -28,13 +29,15 @@ class SearchAndStream(object):
         self.quality = quality
         self.port = port
         self.do_cast = cast
+        self.player = player
 
     def download(self, results):
         log.info("Processing magnet link")
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
         manager = DownloadManager(magnet, port=self.port, serve=self.serve,
-                                  sub_lang=self.sub_lang, cast=self.do_cast)
+                                  sub_lang=self.sub_lang, cast=self.do_cast,
+                                  player=self.player)
         manager.start()
         set_config_dir()
 
@@ -95,6 +98,8 @@ def main():
                         help="Show _all_ the logs")
     parser.add_argument("--cast", action="store_true", default=False,
                         help="Stream to Google Chromecast")
+    parser.add_argument("--player", default='vlc',
+                        help="Player to use. vlc|omxplayer")
 
     args = parser.parse_args()
 
@@ -107,7 +112,8 @@ def main():
     touchandgo = SearchAndStream(args.name, season=args.sea_ep[0],
                                  episode=episode, sub_lang=args.sub,
                                  serve=args.serve, quality=args.quality,
-                                 port=args.port, cast=args.cast)
+                                 port=args.port, cast=args.cast,
+                                 player=args.player)
     if args.daemon:
         def callback():
             touchandgo.serve = True
