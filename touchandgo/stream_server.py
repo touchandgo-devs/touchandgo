@@ -16,7 +16,6 @@ from touchandgo.settings import WAIT_FOR_IT
 
 
 log = logging.getLogger('touchandgo.stream_server')
-_guess = None
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):

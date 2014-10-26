@@ -90,6 +90,7 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print("\n" * 80)
+                print self.stats()
                 sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
@@ -150,7 +151,7 @@ class DownloadManager(object):
         interface = get_interface()
         guess = self.guess(self.get_video_path())
         self.chromecast.play_media("http://%s:%s" % (interface, self.port),
-                                   guess['mimetype'])
+                                   guess['mimetype'], title="Touchandgo")
 
     def stream(self):
         if self.callback is not None and not self.streaming:
