@@ -19,8 +19,7 @@ log = logging.getLogger('touchandgo.main')
 
 class SearchAndStream(object):
     def __init__(self, name, season=None, episode=None, sub_lang=None,
-                 serve=False, quality=None, port=None, cast=False,
-                 player=None):
+                 serve=False, quality=None, port=None, player=None):
         self.name = name
         self.season = season
         self.episode = episode
@@ -28,7 +27,6 @@ class SearchAndStream(object):
         self.serve = serve
         self.quality = quality
         self.port = port
-        self.do_cast = cast
         self.player = player
 
     def download(self, results):
@@ -36,8 +34,7 @@ class SearchAndStream(object):
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
         manager = DownloadManager(magnet, port=self.port, serve=self.serve,
-                                  sub_lang=self.sub_lang, cast=self.do_cast,
-                                  player=self.player)
+                                  sub_lang=self.sub_lang, player=self.player)
         manager.start()
         set_config_dir()
 
@@ -48,7 +45,7 @@ class SearchAndStream(object):
 
     def watch(self):
         try:
-            if self.name[:6] == 'magnet':
+            if self.name.startswith('magnet'):
                 results = {'magnet': self.name}
                 self.download(results)
             else:
@@ -96,8 +93,6 @@ def main():
                         help="Stream next episode when this episode finishes")
     parser.add_argument("--verbose", action="store_true", default=None,
                         help="Show _all_ the logs")
-    parser.add_argument("--cast", action="store_true", default=False,
-                        help="Stream to Google Chromecast")
     parser.add_argument("--player", default='vlc',
                         help="Player to use. vlc|omxplayer")
 
@@ -112,7 +107,7 @@ def main():
     touchandgo = SearchAndStream(args.name, season=args.sea_ep[0],
                                  episode=episode, sub_lang=args.sub,
                                  serve=args.serve, quality=args.quality,
-                                 port=args.port, cast=args.cast,
+                                 port=args.port,
                                  player=args.player)
     if args.daemon:
         def callback():

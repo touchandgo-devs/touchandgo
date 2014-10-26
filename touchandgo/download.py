@@ -5,7 +5,6 @@ import argparse
 import thread
 import logging
 
-from os import system
 from os import _exit
 from os.path import join, exists
 from time import sleep
@@ -15,7 +14,7 @@ from guessit import guess_video_info
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
-from touchandgo.helpers import is_port_free, get_free_port, get_interface
+from touchandgo.helpers import is_port_free, get_free_port
 from touchandgo.logger import log_set_up
 from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT, WAIT_FOR_IT, \
     DEFAULT_PORT
@@ -32,7 +31,7 @@ class DownloadManager(object):
     sub_downloader_class = SubtitleDownloader
 
     def __init__(self, magnet, port=None, sub_lang=None, serve=False,
-                 cast=False, player=None):
+                 player=None):
         self.magnet = magnet
         if port is None:
             port = DEFAULT_PORT
@@ -41,12 +40,11 @@ class DownloadManager(object):
             port = get_free_port()
 
         log.info("[Magnet]: %s [Port]: %s [Sub_lang]: %s [Serve]: %s "
-                 "[Cast]: %s [Player] %s ",
-                 magnet, port, sub_lang, serve, cast, player)
+                 "[Player] %s ",
+                 magnet, port, sub_lang, serve, player)
 
         self.port = port
         self.serve = serve
-        self.do_cast = cast
         self.player = player
 
         # number of pieces to wait until start streaming
@@ -132,37 +130,30 @@ class DownloadManager(object):
 
         return biggest_file
 
-    def run_player(self):
+    def wait_for_file(self):
         while not exists(join(TMP_DIR, self.video_file[0])):
             sleep(WAIT_FOR_IT)
-        if self.player == 'omxplayer':
-            command = ("omxplayer --live --timeout 360 -p -o hdmi "
-                       "http://localhost:%s" % self.port)
-            if self.subtitle is not None:
-                subtitle = self.subtitle.download(self.video_file)
-                if subtitle is not None:
-                    command += " --subtitle %s" % subtitle
+
+    def output(self):
+        from touchandgo.output import VLCOutput, OMXOutput, CastOutput
+        self.wait_for_file()
+        stream_url = "http://localhost:%s" % self.port
+        if self.subtitle is not None:
+            subtitle = self.subtitle.download(self.video_file)
         else:
-            command = "vlc http://localhost:%s -q" % self.port
-            if self.subtitle is not None:
-                subtitle = self.subtitle.download(self.video_file)
-                if subtitle is not None:
-                    command += " --sub-file %s" % subtitle
+            subtitle = None
+
+        players = {"vlc": VLCOutput,
+                   "omxplayer": OMXOutput,
+                   "chromecast": CastOutput
+                   }
+        output_class = players.get(self.player, VLCOutput)
+        output = output_class(stream_url, subtitle, self)
         try:
-            log.info("Player command: %s", command)
-            system(command)
+            output.run()
         except KeyboardInterrupt:
-            log.debug("Closing %s", self.player)
+            log.debug("Closing output thread")
         _exit(0)
-
-    def cast(self):
-        import pychromecast
-
-        self.chromecast = pychromecast.get_chromecast()
-        interface = get_interface()
-        guess = self.guess(self.get_video_path())
-        self.chromecast.play_media("http://%s:%s" % (interface, self.port),
-                                   guess['mimetype'], title="Touchandgo")
 
     def stream(self):
         if self.callback is not None and not self.streaming:
@@ -170,10 +161,8 @@ class DownloadManager(object):
             pieces = self.status.pieces
             self._served_blocks = [False for i in range(len(pieces))]
             self.stream_th = thread.start_new_thread(self.callback, (self, ))
-            if not self.serve and not self.do_cast:
-                self.player_th = thread.start_new_thread(self.run_player, ())
-            if self.do_cast:
-                self.cast_th = thread.start_new_thread(self.cast, ())
+            if not self.serve:
+                self.player_th = thread.start_new_thread(self.output, ())
 
     def block_served(self, block):
         self._served_blocks[block] = True
@@ -218,10 +207,6 @@ class DownloadManager(object):
         if self._guess is None:
             self._guess = guess_video_info(path, info=['filename'])
         return self._guess
-
-    def __del__(self):
-        if self.do_cast:
-            self.chromecast.media_controller.stop()
 
 
 def main():
