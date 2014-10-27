@@ -29,19 +29,23 @@ class SearchAndStream(object):
         self.port = port
         self.player = player
 
+        set_config_dir()
+
     def download(self, results):
         log.info("Processing magnet link")
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
-        manager = DownloadManager(magnet, port=self.port, serve=self.serve,
-                                  sub_lang=self.sub_lang, player=self.player)
-        manager.start()
+
         set_config_dir()
 
         history = History(date=int(time()), name=self.name, season=self.season,
-                          episode=self.episode)
+                          episode=self.episode, magnet=magnet)
         history.save()
         history.update()
+
+        manager = DownloadManager(magnet, port=self.port, serve=self.serve,
+                                  sub_lang=self.sub_lang, player=self.player)
+        manager.start()
 
     def watch(self):
         try:
@@ -49,7 +53,14 @@ class SearchAndStream(object):
                 results = {'magnet': self.name}
                 self.download(results)
             else:
-                self.search_magnet()
+                history = History.one(name=self.name, season=self.season,
+                                      episode=self.episode)
+                if history is None or not hasattr(history, "magnet"):
+                    self.search_magnet()
+                else:
+                    results = {'magnet': history.magnet}
+                    self.download(results)
+
         except KeyboardInterrupt:
             log.info("Thanks for using Touchandgo")
             _exit(0)
