@@ -1,0 +1,5 @@
+limits:
+    download: 2048
+    upload: 2048
+players:
+    default: vlc

@@ -14,8 +14,9 @@ from guessit import guess_video_info
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
-from touchandgo.helpers import is_port_free, get_free_port
+from touchandgo.helpers import is_port_free, get_free_port, get_settings
 from touchandgo.logger import log_set_up
+from touchandgo.output import VLCOutput, OMXOutput, CastOutput
 from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT, WAIT_FOR_IT, \
     DEFAULT_PORT
 from touchandgo.strategy import DefaultStrategy
@@ -32,6 +33,7 @@ class DownloadManager(object):
 
     def __init__(self, magnet, port=None, sub_lang=None, serve=False,
                  player=None):
+        self.settings = get_settings()
         self.magnet = magnet
         if port is None:
             port = DEFAULT_PORT
@@ -45,6 +47,8 @@ class DownloadManager(object):
 
         self.port = port
         self.serve = serve
+        if player is None:
+            player = self.settings['players']['default']
         self.player = player
 
         # number of pieces to wait until start streaming
@@ -135,7 +139,6 @@ class DownloadManager(object):
             sleep(WAIT_FOR_IT)
 
     def output(self):
-        from touchandgo.output import VLCOutput, OMXOutput, CastOutput
         self.wait_for_file()
         stream_url = "http://localhost:%s" % self.port
         if self.subtitle is not None:

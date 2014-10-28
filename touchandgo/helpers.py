@@ -7,13 +7,15 @@ from daemon import DaemonContext
 from datetime import datetime
 from lock import Lock
 from os import mkdir
-from os.path import getmtime, exists
-
-from qtfaststart.processor import get_index
-from qtfaststart.exceptions import FastStartException
+from os.path import getmtime, exists, dirname, join
+from shutil import copyfile
 
 from netifaces import interfaces, ifaddresses
 from ojota import set_data_source
+from pyaml import yaml
+from qtfaststart.processor import get_index
+from qtfaststart.exceptions import FastStartException
+
 
 from touchandgo.logger import log_set_up
 
@@ -21,6 +23,18 @@ from touchandgo.logger import log_set_up
 LOCKFILE = "/tmp/touchandgo"
 
 log = logging.getLogger('touchandgo.helpers')
+
+def get_settings():
+    settings_file = "%s/.touchandgo/settings.yaml" % os.getenv("HOME")
+
+    if not exists(settings_file):
+        default = join(dirname(__file__), "templates", "settings.yaml")
+        print default, settings_file
+        copyfile(default, settings_file)
+
+    settings = yaml.load(open(settings_file).read())
+    return settings
+
 
 
 def get_free_port():
