@@ -25,7 +25,8 @@ setup(
                       'flask',
                       'simplejson',
                       'python-daemon',
-                      'ojota'],
+                      'ojota',
+                      'pyaml'],
     entry_points={
         'console_scripts': ['touchandgo = touchandgo.__init__:main',
                             'tsproxy = touchandgo.server:serve']
