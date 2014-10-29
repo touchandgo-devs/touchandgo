@@ -17,7 +17,7 @@ from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port, get_settings
 from touchandgo.logger import log_set_up
 from touchandgo.output import VLCOutput, OMXOutput, CastOutput
-from touchandgo.settings import DEBUG, TMP_DIR, DOWNLOAD_LIMIT, WAIT_FOR_IT, \
+from touchandgo.settings import DEBUG, TMP_DIR, WAIT_FOR_IT, \
     DEFAULT_PORT
 from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
@@ -79,7 +79,8 @@ class DownloadManager(object):
             }
         self.session = session()
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
-        self.handle.set_upload_limit(DOWNLOAD_LIMIT)
+        self.handle.set_upload_limit(self.settings['limits']['upload'])
+        self.handle.set_download_limit(self.settings['limits']['download'])
 
     @property
     def status(self):
