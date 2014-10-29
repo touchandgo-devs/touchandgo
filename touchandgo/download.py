@@ -10,6 +10,7 @@ from os.path import join, exists
 from time import sleep
 from datetime import datetime
 
+from colorama import Fore
 from guessit import guess_video_info
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
@@ -22,6 +23,7 @@ from touchandgo.settings import DEBUG, TMP_DIR, WAIT_FOR_IT, \
 from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
 from touchandgo.subtitles import SubtitleDownloader
+
 
 
 log = logging.getLogger('touchandgo.download')
@@ -177,23 +179,24 @@ class DownloadManager(object):
         numerales = ""
         pieces = self.status.pieces
         for i, piece in enumerate(pieces):
-            numeral = "#" if piece else " "
+            numeral = Fore.GREEN + "#" if piece else Fore.RED + "#"
             if i in downloading:
-                numeral = "v"
+                numeral = Fore.YELLOW + "v"
             elif self._served_blocks is not None and self._served_blocks[i]:
-                numeral = ">"
+                numeral = Fore.BLUE + ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
         return "%s\n" % numerales
 
     def stats(self, defrag=False):
         status = self.status
-        text = ""
+        text = Fore.WHITE
         if self._video_file is not None:
             text += "Serving %s on http://localhost:%s\n" % (self.video_file[0],
                                                              self.port)
         if defrag:
             text += self.defrag()
+        text += Fore.WHITE
         text += '%s %.2f%% complete ' % (STATES[status.state],
                                          status.progress * 100)
         text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
