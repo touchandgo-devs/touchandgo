@@ -29,7 +29,6 @@ def get_settings():
 
     if not exists(settings_file):
         default = join(dirname(__file__), "templates", "settings.yaml")
-        print default, settings_file
         copyfile(default, settings_file)
 
     settings = yaml.load(open(settings_file).read())
