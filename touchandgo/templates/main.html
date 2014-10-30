@@ -1,15 +1,41 @@
 <!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         <title>Touchandgo</title>
+        <style>
+          .row:hover {
+            background-color: #F5F5F5;
+          }
+          .row {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-radius: 9px;
+          }
+        </style>
     </head>
     <body>
+      <div class="container">
+        <div class="page-header">
+          <h1>History <small> These are your last played items</small></h1>
+        </div>
+        <div class="container">
         {%for item in items%}
-            <div>
-              <a href="/{{item.name}}/{{item.season}}/{{item.episode}}">{{item.name}} {{item.season}} {{item.episode}}</a> 
-              <a href="/{{item.name}}/{{item.season}}/{{item.next}}">></a> 
+          <div class="row">
+            <div class="col-xs-8">
+              <span class="text-capitalize">{{item.name}} {{item.season}} {{item.episode}}</span>
             </div>
-        {%endfor%} 
+            <div class="col-xs-4">
+              <a class="btn btn-xs btn-primary" href="/{{item.name}}/{{item.season}}/{{item.episode}}">Watch</a>
+              <a class="btn btn-xs btn-default" href="/{{item.name}}/{{item.season}}/{{item.next}}">Next Ep.</a>
+            </div>
+          </div>
+        {%endfor%}
+        </div>
+      </div>
     </body>
 </html>
