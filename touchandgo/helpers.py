@@ -85,6 +85,7 @@ def daemonize(args, callback):
         lock = Lock(LOCKFILE, os.getpid(), args.name, args.sea_ep[0],
                     args.sea_ep[1], args.port)
         if lock.is_locked():
+            log.debug("lock active")
             lock_pid = lock.get_pid()
             if not lock.is_same_file(args.name, args.sea_ep[0],
                                      args.sea_ep[1]) \
@@ -106,6 +107,8 @@ def daemonize(args, callback):
             lock.acquire()
             callback()
             lock.release()
+        else:
+            log.debug("same daemon process")
 
 
 def get_lock_diff():
