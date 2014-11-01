@@ -25,7 +25,6 @@ from touchandgo.stream_server import serve_file
 from touchandgo.subtitles import SubtitleDownloader
 
 
-
 log = logging.getLogger('touchandgo.download')
 
 
@@ -81,8 +80,13 @@ class DownloadManager(object):
             }
         self.session = session()
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
-        self.handle.set_upload_limit(self.settings['limits']['upload'])
-        self.handle.set_download_limit(self.settings['limits']['download'])
+
+        up_limit = self.settings['limits']['upload']
+        if up_limit:
+            self.handle.set_upload_limit(up_limit)
+        down_limit = self.settings['limits']['download']
+        if down_limit:
+            self.handle.set_download_limit(down_limit)
 
     @property
     def status(self):
