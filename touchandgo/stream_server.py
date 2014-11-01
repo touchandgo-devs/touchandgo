@@ -120,9 +120,9 @@ class VideoHandler(SimpleHTTPRequestHandler):
             log.debug("returning 206 code")
             self.send_response(206)
         else:
-            self.send_header("Accept-Ranges", "bytes")
             log.debug("returning 200 code")
             self.send_response(200)
+            self.send_header("Accept-Ranges", "bytes")
         guess = self.manager.guess(path)
         self.send_header("Content-Type", guess['mimetype'])
         log.debug("mime type is %s" % guess['mimetype'])
