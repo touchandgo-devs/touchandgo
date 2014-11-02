@@ -34,7 +34,7 @@ def serve(py_exec=None):
     app.jinja_loader = FileSystemLoader(template_path)
 
     @app.route("/favicon.ico")
-    def favicon(self):
+    def favicon():
         return ""
 
     @app.route("/<name>")

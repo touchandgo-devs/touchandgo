@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         <title>Touchandgo</title>
         <style>
@@ -16,26 +16,74 @@
             padding-bottom: 10px;
             border-radius: 9px;
           }
+          .video {
+            margin: 20px 0;
+          }
         </style>
     </head>
     <body>
       <div class="container">
         <div class="page-header">
-          <h1>History <small> These are your last played items</small></h1>
+          <h1>Search <small>Search for a show or movie</small></h1>
         </div>
         <div class="container">
+          <form class="form-inline" role="form">
+            <div class="form-group">
+              <input class="form-control" type="text" id="title" placeholder="Title">
+            </div>
+            <div class="form-group">
+              <input class="form-control" type="text" id="season" placeholder="Season">
+            </div>
+            <div class="form-group">
+              <input class="form-control" type="text" id="episode" placeholder="Episode">
+            </div>
+            <button id="play" class="btn btn-default">Play</button>
+          </form>
+        </div>
+        <div class="container video">
+          <video src="" autoplay="autoplay" controls>
+        </div>
+        <div class="page-header">
+          <h1>History <small> These are your last played items</small></h1>
+        </div>
+        <div class="container history">
         {%for item in items%}
           <div class="row">
             <div class="col-xs-8">
-              <span class="text-capitalize">{{item.name}} {{item.season}} {{item.episode}}</span>
+              <span class="text-capitalize">{{item.name}}{%if item.season%} {{item.season}} {{item.episode}}{%endif%}</span>
             </div>
             <div class="col-xs-4">
+            {%if item.season%}
               <a class="btn btn-xs btn-primary" href="/{{item.name}}/{{item.season}}/{{item.episode}}">Watch</a>
               <a class="btn btn-xs btn-default" href="/{{item.name}}/{{item.season}}/{{item.next}}">Next Ep.</a>
+            {%else%}
+              <a class="btn btn-xs btn-primary" href="/{{item.name}}">Watch</a>
+            {%endif%}
             </div>
           </div>
         {%endfor%}
         </div>
       </div>
     </body>
+    <script>
+      $('.history').on('click', 'a',  function(e){
+        e.preventDefault();
+        $('video').attr('src', this.href);
+      });
+
+      $('#play').on('click', function(e){
+        e.preventDefault()
+        var title   = encodeURIComponent(document.querySelector('#title').value);
+        var episode = encodeURIComponent(document.querySelector('#episode').value);
+        var season  = encodeURIComponent(document.querySelector('#season').value);
+        var url = window.location + title;
+
+        // If there's a season or episode, treat this as series
+        if (season || episode) {
+          url += '/' + season + '/' + episode;
+        }
+
+        document.querySelector('video').src = url;
+      });
+    </script>
 </html>
