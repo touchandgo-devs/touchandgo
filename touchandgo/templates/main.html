@@ -44,6 +44,7 @@
               <input class="form-control" type="text" id="episode" placeholder="Episode">
             </div>
             <button id="play" class="btn btn-default">Play</button>
+            <button id="kill" class="btn btn-danger">Kill</button>
           </form>
         </div>
         <div class="container video">
@@ -75,10 +76,22 @@
       var streamingURL = '//' + window.location.hostname + ':8890';
       var maxIterations = 10;
 
+      function loadVideo(url){
+        $.get(url);
+        $('video').attr('src', streamingURL+'?1');
+      }
+
       $('.history').on('click', 'a',  function(e){
         e.preventDefault();
-        $('video').attr('src', this.href);
+        loadVideo(this.href);
       });
+
+      $('#kill').on('click',  function(e){
+        e.preventDefault();
+        $.get(window.location + 'kill').done(function(){
+          $('video').attr('src', '');
+        });
+      })
 
       $('#play').on('click', function(e){
         e.preventDefault()
@@ -91,8 +104,7 @@
         if (season || episode) {
           url += '/' + season + '/' + episode;
         }
-        $.get(url);
-        document.querySelector('video').src = streamingURL+'?1';
+        loadVideo(url);
       });
 
       $('video').on('error', function(){
