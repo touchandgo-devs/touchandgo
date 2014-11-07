@@ -206,7 +206,7 @@ class DownloadManager(object):
         text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
             (status.download_rate / 1000, status.upload_rate / 1000,
              status.num_peers)
-        text += "Elapsed Time %s" % (datetime.now() - self.start_time)
+        text += "Elapsed Time %s" % str(datetime.now() - self.start_time).split(".")[0]
         return text
 
     def get_video_path(self):
