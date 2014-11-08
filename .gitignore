@@ -1,5 +1,7 @@
 *.pyc
 *.swp
+*.swo
+*.swn
 .ropeproject
 dist
 build
