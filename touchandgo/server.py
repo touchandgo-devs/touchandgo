@@ -93,13 +93,15 @@ def serve(py_exec=None):
         series = []
         keys = []
         items = History.many(sorted="-date,-season,-episode")
+
+        # Filter duplicate entries in the history list
         for item in items:
             key = (item.name, item.season is not None)
             if key not in keys:
                 series.append(item)
                 keys.append(key)
 
-        return render_template("main.html", items=series)
+        return render_template("main.html", items=series, magnet=request.args.get('m', ''))
 
     set_config_dir()
     app.debug = True

@@ -41,7 +41,7 @@
         <div class="container">
           <form class="form-inline" role="form">
             <div class="form-group">
-              <input class="form-control" type="text" id="title" placeholder="Title">
+              <input class="form-control" type="text" id="title" placeholder="Title" value="{{magnet}}">
               <input class="form-control" type="text" id="season" placeholder="Season">
               <input class="form-control" type="text" id="episode" placeholder="Episode">
             </div>
@@ -77,6 +77,7 @@
           </div>
         {%endfor%}
         </div>
+        <button type="button" class="btn btn-info" id="register">Register</button>
       </div>
     </body>
     <script>
@@ -97,19 +98,27 @@
 
       $('#kill').on('click',  function(e){
         e.preventDefault();
-        $.get(window.location + 'kill').done(function(){
+        $.get('//' + window.location.host + '/kill').done(function(){
           $('video').attr('src', '');
           $('.video, .video video').hide();
         });
-      })
+      });
+
+      $('#register').on('click', function(e){
+        e.preventDefault();
+        navigator.registerProtocolHandler(
+          "magnet",
+          "http://raspberrypi.local:5000/?m=%s",
+          "Touchandgo"
+        );
+      });
 
       $('#play').on('click', function(e){
         e.preventDefault()
         var title   = encodeURIComponent(document.querySelector('#title').value);
         var episode = encodeURIComponent(document.querySelector('#episode').value);
         var season  = encodeURIComponent(document.querySelector('#season').value);
-        var url = window.location;
-
+        var url = '//' + window.location.host + '/';
 
         if (title.indexOf('magnet%3A') == 0){
           url += 'magnet?m=' + title;
@@ -136,9 +145,14 @@
           $('video').attr('src', streamingURL + '?' + ++iterations);
         }, iterations * 10 * 1000, false);
       }).on('canplay', function(){
+        console.log('sarasa')
         $('video').show();
         $('.progress').hide();
       });
+
+      {%if magnet%}
+      loadVideo('//'+window.location.host+'/magnet?m='+encodeURIComponent($('#title').val()))
+      {%endif%}
 
     </script>
 </html>
