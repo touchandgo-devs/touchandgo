@@ -18,12 +18,18 @@
           }
           .video {
             margin: 20px 0;
+            text-align: center;
           }
           .video video {
             min-height: 480px;
             min-width: 640px;
-            max-height: 480px;
-            max-width: 640px;
+            max-width: 100%;
+            display: none;
+          }
+          .video .progress {
+            width: 640px;
+            margin: auto;
+            display: none;
           }
         </style>
     </head>
@@ -36,11 +42,7 @@
           <form class="form-inline" role="form">
             <div class="form-group">
               <input class="form-control" type="text" id="title" placeholder="Title">
-            </div>
-            <div class="form-group">
               <input class="form-control" type="text" id="season" placeholder="Season">
-            </div>
-            <div class="form-group">
               <input class="form-control" type="text" id="episode" placeholder="Episode">
             </div>
             <button id="play" class="btn btn-default">Play</button>
@@ -48,7 +50,12 @@
           </form>
         </div>
         <div class="container video">
-          <video poster="//c2.staticflickr.com/6/5498/10148998914_e6c85c8415_b.jpg" autoplay="autoplay" controls>
+          <video poster="//c2.staticflickr.com/6/5498/10148998914_e6c85c8415_b.jpg" autoplay="autoplay" controls></video>
+          <div class="progress">
+            <div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 0%">
+              <span class="sr-only"><span class="completion">0</span>% Complete</span>
+            </div>
+          </div>
         </div>
         <div class="page-header">
           <h1>History <small> These are your last played items</small></h1>
@@ -79,6 +86,8 @@
       function loadVideo(url){
         $.get(url);
         $('video').attr('src', streamingURL+'?1');
+          $('.progress-bar').css('width', '5%');
+        $('.video, .progress').show();
       }
 
       $('.history').on('click', 'a',  function(e){
@@ -90,6 +99,7 @@
         e.preventDefault();
         $.get(window.location + 'kill').done(function(){
           $('video').attr('src', '');
+          $('.video, .video video').hide();
         });
       })
 
@@ -98,11 +108,17 @@
         var title   = encodeURIComponent(document.querySelector('#title').value);
         var episode = encodeURIComponent(document.querySelector('#episode').value);
         var season  = encodeURIComponent(document.querySelector('#season').value);
-        var url = window.location + title;
+        var url = window.location;
 
-        // If there's a season or episode, treat this as series
-        if (season || episode) {
-          url += '/' + season + '/' + episode;
+
+        if (title.indexOf('magnet%3A') == 0){
+          url += 'magnet?m=' + title;
+        } else {
+          url += title;
+          if (season || episode) {
+            // If there's a season or episode, treat this as series
+            url += '/' + season + '/' + episode;
+          }
         }
         loadVideo(url);
       });
@@ -115,10 +131,13 @@
         }
 
         window.setTimeout(function(){
+          $('.progress-bar').css('width', (iterations * 10) + '%');
+          $('.progress .completion').text(iterations * 10);
           $('video').attr('src', streamingURL + '?' + ++iterations);
         }, iterations * 10 * 1000, false);
       }).on('canplay', function(){
-        this.play();
+        $('video').show();
+        $('.progress').hide();
       });
 
     </script>
