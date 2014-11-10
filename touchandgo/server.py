@@ -8,7 +8,7 @@ from os.path import abspath, dirname, join
 
 from subprocess import PIPE, STDOUT, Popen
 from time import sleep
-from flask import Flask, redirect, render_template, Response
+from flask import Flask, redirect, render_template, Response, request
 from jinja2 import FileSystemLoader
 
 from touchandgo.helpers import get_interface, get_lock_diff, LOCKFILE, \
@@ -33,20 +33,13 @@ def serve(py_exec=None):
     template_path = join(dirname(__file__), "templates")
     app.jinja_loader = FileSystemLoader(template_path)
 
-    @app.route("/favicon.ico")
-    def favicon():
-        return ""
-
-    @app.route("/<name>")
-    @app.route("/<name>/<season>/<episode>")
-    def redirect_to(name, season=None, episode=None):
-        log.info("Requesting %s %s %s", name, season, episode)
+    def get_torrent(name, season=None, episode=None):
         interface = get_interface()
         path = abspath(__file__)
         dir_path = dirname(path)
         exec_ = join(dir_path, "__init__.py")
 
-        port = "8890"#get_free_port()
+        port = "8890"  # get_free_port()
 
         command = '%s %s \"%s\" ' % (py_exec, exec_, name)
         if season is not None:
@@ -60,6 +53,21 @@ def serve(py_exec=None):
         redirect_url = "http://%s:%s" % (interface, port)
         log.info("redirecting to %s" % redirect_url)
         return redirect(redirect_url)
+
+    @app.route("/favicon.ico")
+    def favicon():
+        return ""
+
+    @app.route("/magnet")
+    def magnet():
+        # Maybe someone wanted to search the movie "magnet", who knows
+        return get_torrent(request.args.get('m', 'magnet'))
+
+    @app.route("/<name>")
+    @app.route("/<name>/<season>/<episode>")
+    def redirect_to(name, season=None, episode=None):
+        log.info("Requesting %s %s %s", name, season, episode)
+        return get_torrent(name, season, episode)
 
     @app.route("/l/<name>/<season>/<episode>")
     @app.route("/l/<name>/<season>/<episode>/")
@@ -92,7 +100,6 @@ def serve(py_exec=None):
                 keys.append(key)
 
         return render_template("main.html", items=series)
-
 
     set_config_dir()
     app.debug = True
