@@ -108,7 +108,7 @@
         e.preventDefault();
         navigator.registerProtocolHandler(
           "magnet",
-          "http://raspberrypi.local:5000/?m=%s",
+          "//" + window.location.host + "/?m=%s",
           "Touchandgo"
         );
       });
