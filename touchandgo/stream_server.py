@@ -13,6 +13,7 @@ from json import dumps
 from os import fstat
 from time import sleep
 
+from touchandgo.constants import STATES
 from touchandgo.settings import WAIT_FOR_IT
 
 
@@ -38,8 +39,12 @@ class VideoHandler(SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-
-        dict_ = {"stats": self.manager.stats()}
+        manager = self.manager
+        dict_ = {"file": manager.video_file,
+                 "elapsed": manager.elapsed_time(),
+                 "rates": manager.rates(),
+                 "state": STATES[manager.status.state],
+                 "peers": manager.status.num_peers}
         data = dumps(dict_)
         self.wfile.write(data)
 
@@ -143,16 +148,16 @@ class VideoHandler(SimpleHTTPRequestHandler):
         if self.range_from is not None or self.range_to is not None:
             # TODO: Should also check that range is within the file size
             self.send_header("Content-Range",
-                                "bytes %d-%d/%d" % (self.range_from,
-                                                    self.range_to,
-                                                    total_length))
+                             "bytes %d-%d/%d" % (self.range_from,
+                                                 self.range_to,
+                                                 total_length))
             # Add 1 because ranges are inclusive
             self.send_header("Content-Length",
-                            (1 + self.range_to - self.range_from))
+                             (1 + self.range_to - self.range_from))
         else:
             self.send_header("Content-Length", str(total_length))
         self.send_header("Last-Modified",
-                            self.date_time_string(fs.st_mtime))
+                         self.date_time_string(fs.st_mtime))
         self.end_headers()
         return f
 
@@ -197,7 +202,7 @@ def parse_range_header(range_header, total_length):
         return (None, None)
     if not range_header.startswith("bytes="):
         log.error("Don't know how to parse Range: %s [1]" %
-                        (range_header))
+                  (range_header))
         raise InvalidRangeHeader("Don't know how to parse non-bytes Range: %s" %
                                  (range_header))
     regex = re.compile(r"^bytes=(\d*)\-(\d*)$")

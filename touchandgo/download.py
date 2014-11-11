@@ -205,11 +205,17 @@ class DownloadManager(object):
         text += Fore.WHITE
         text += '%s %.2f%% complete ' % (STATES[status.state],
                                          status.progress * 100)
+        rates = self.rates()
         text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
-            (status.download_rate / 1000, status.upload_rate / 1000,
-             status.num_peers)
-        text += "Elapsed Time %s" % str(datetime.now() - self.start_time).split(".")[0]
+            (rates[0], rates[1], status.num_peers)
+        text += "Elapsed Time %s" % self.elapsed_time()
         return text
+
+    def elapsed_time(self):
+        return str(datetime.now() - self.start_time).split(".")[0]
+
+    def rates(self):
+        return self.status.download_rate / 1000, self.status.upload_rate / 1000
 
     def get_video_path(self):
         video = self.video_file
