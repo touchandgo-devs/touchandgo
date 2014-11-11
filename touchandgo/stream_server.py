@@ -9,6 +9,7 @@ from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
+from json import dumps
 from os import fstat
 from time import sleep
 
@@ -32,14 +33,29 @@ class VideoHandler(SimpleHTTPRequestHandler):
         except:
             pass
 
+    def status(self):
+        log.debug("returning 200 code")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+
+        dict_ = {"stats": self.manager.stats()}
+        data = dumps(dict_)
+        self.wfile.write(data)
+
+
     def do_GET(self):
-        f = self.send_head()
-        if f:
-            if self.range_from is not None and self.range_to is not None:
-                self.copy_chunk(f, self.wfile)
-            else:
-                self.copyfile(f, self.wfile)
-            f.close()
+
+        if self.path == "/status":
+            self.status()
+        else:
+            f = self.send_head()
+            if f:
+                if self.range_from is not None and self.range_to is not None:
+                    self.copy_chunk(f, self.wfile)
+                else:
+                    self.copyfile(f, self.wfile)
+                f.close()
 
     def copy_chunk(self, in_file, out_file):
         def get_piece_length():
@@ -63,7 +79,6 @@ class VideoHandler(SimpleHTTPRequestHandler):
 
         bytes_copied = 0
         blocks = get_blocks_for_range(self.range_from, self.range_to)
-        #print "getting blocks", blocks
         for block_number in range(blocks[0], blocks[1]+1):
             if not is_block_available(block_number):
                 log.debug("requesting block %s" % block_number)
@@ -72,8 +87,6 @@ class VideoHandler(SimpleHTTPRequestHandler):
 
             while not is_block_available(block_number):
                 sleep(WAIT_FOR_IT)
-            #print "returning block", block_number
-            #log.debug("returning block %s" % block_number)
             self.manager.block_served(block_number)
             read_buf = in_file.read(length)
             if len(read_buf) == 0:
