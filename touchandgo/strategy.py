@@ -81,7 +81,7 @@ class DefaultStrategy(object):
         self.reset_priorities()
         self.piece_st = first_block
 
-        self.handle.set_sequential_download(True)
+        #self.handle.set_sequential_download(True)
         status = self.handle.status()
         last_piece = len(status.pieces) - 1
 
