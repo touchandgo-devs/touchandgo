@@ -105,8 +105,6 @@ class DownloadManager(object):
                 sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
-            #trying to optimize the streaming start in tsproxy
-            self.stream()
 
             while True:
                 is_seed = self.handle.is_seed()
