@@ -81,7 +81,7 @@
       </div>
     </body>
     <script>
-      var streamingURL = '//' + window.location.hostname + ':8890';
+      var streamingURL = '';
       var maxIterations = 10;
 
       function loadVideo(url){
@@ -93,6 +93,7 @@
 
       $('.history').on('click', 'a',  function(e){
         e.preventDefault();
+        streamingURL = this.href;
         loadVideo(this.href);
       });
 

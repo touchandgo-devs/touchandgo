@@ -44,7 +44,8 @@ class VideoHandler(SimpleHTTPRequestHandler):
                  "elapsed": manager.elapsed_time(),
                  "rates": manager.rates(),
                  "state": STATES[manager.status.state],
-                 "peers": manager.status.num_peers}
+                 "peers": manager.status.num_peers,
+                 "streaming": manager.streaming}
         data = dumps(dict_)
         self.wfile.write(data)
 

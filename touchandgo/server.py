@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import argparse
 import logging
+import requests
 import signal
 
 from os import kill
@@ -12,7 +13,7 @@ from flask import Flask, redirect, render_template, Response, request
 from jinja2 import FileSystemLoader
 
 from touchandgo.helpers import get_interface, get_lock_diff, LOCKFILE, \
-    set_config_dir, get_free_port
+    set_config_dir, get_free_port, is_process_running
 from touchandgo.history import History
 from touchandgo.lock import Lock
 from touchandgo.logger import log_set_up
@@ -38,19 +39,29 @@ def serve(py_exec=None):
         path = abspath(__file__)
         dir_path = dirname(path)
         exec_ = join(dir_path, "__init__.py")
-
-        port = "8890"  # get_free_port()
-
         command = '%s %s \"%s\" ' % (py_exec, exec_, name)
         if season is not None:
             command += "%s %s " % (season, episode)
-        command += "--daemon --port %s " % port
-        log.debug(command)
-        process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
-        sleep(1)
-        while get_lock_diff() < 30:
+        lock = Lock(LOCKFILE)
+        if lock.is_same_file(name, season, episode) and \
+                is_process_running(lock.get_pid()):
+            data = lock._get_file_data()
+            port = data[4]
+        else:
+            port = get_free_port()
+            command += "--daemon --port %s " % port
+            log.debug(command)
+            process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
             sleep(1)
+
         redirect_url = "http://%s:%s" % (interface, port)
+        serving = False
+        while not serving:
+            try:
+                req = requests.get("%s/status" % redirect_url)
+                serving = True
+            except requests.ConnectionError, e:
+                sleep(1)
         log.info("redirecting to %s" % redirect_url)
         return redirect(redirect_url)
 
@@ -85,7 +96,10 @@ def serve(py_exec=None):
     @app.route("/kill")
     def kill_():
         lock = Lock(LOCKFILE)
-        kill(lock.get_pid(), signal.SIGQUIT)
+        try:
+            kill(lock.get_pid(), signal.SIGQUIT)
+        except Exception, e:
+            pass
         return "OK"
 
     @app.route("/")
@@ -105,6 +119,7 @@ def serve(py_exec=None):
 
     set_config_dir()
     app.debug = True
+    kill_()
     app.run(host="0.0.0.0")
 
 
