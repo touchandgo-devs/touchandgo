@@ -12,8 +12,8 @@ from time import sleep
 from flask import Flask, redirect, render_template, Response, request
 from jinja2 import FileSystemLoader
 
-from touchandgo.helpers import get_interface, get_lock_diff, LOCKFILE, \
-    set_config_dir, get_free_port, is_process_running
+from touchandgo.helpers import get_interface, LOCKFILE, set_config_dir, \
+    get_free_port, is_process_running
 from touchandgo.history import History
 from touchandgo.lock import Lock
 from touchandgo.logger import log_set_up

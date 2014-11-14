@@ -8,7 +8,7 @@ from subliminal import download_best_subtitles
 from subliminal.subtitle import get_subtitle_path
 from subliminal.video import Video
 
-from touchandgo.settings import TMP_DIR
+from touchandgo.helpers import get_settings
 
 
 log = logging.getLogger('touchandgo.download')
@@ -19,9 +19,11 @@ class SubtitleDownloader(object):
         self.lang = sub_lang
 
     def download(self, video_file):
+        settings = get_settings()
+        download_dir = settings['save_path']
         print("Downloading subtitle")
         log.info("Downloading subtitle")
-        filepath = join(TMP_DIR, video_file[0])
+        filepath = join(download_dir, video_file[0])
         guess = guess_video_info(filepath, info=['filename'])
         video = Video.fromguess(filepath, guess)
         video.size = video_file[1]
@@ -30,7 +32,7 @@ class SubtitleDownloader(object):
         if not len(subtitle):
             subtitle = None
         else:
-            subtitle = get_subtitle_path(join(TMP_DIR, video.name))
+            subtitle = get_subtitle_path(join(download_dir, video.name))
         log.info("video_file: %s, filepath: %s, guess: %s, video: %s"
                  "subtitle: %s", video_file, filepath, guess, video, subtitle)
         return subtitle

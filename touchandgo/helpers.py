@@ -18,7 +18,6 @@ from qtfaststart.exceptions import FastStartException
 
 
 from touchandgo.settings import SKIP_MOOV
-from touchandgo.logger import log_set_up
 
 
 LOCKFILE = "/tmp/touchandgo"
@@ -79,6 +78,7 @@ def is_process_running(process_id):
 
 def daemonize(args, callback):
     with DaemonContext():
+        from touchandgo.logger import log_set_up
         log_set_up(True)
         log = logging.getLogger('touchandgo.daemon')
         log.info("running daemon")

@@ -5,14 +5,16 @@ from logging.handlers import RotatingFileHandler
 from os import mkdir
 from os.path import exists
 
-from touchandgo.settings import DEBUG, TMP_DIR
+from touchandgo.helpers import get_settings
+from touchandgo.settings import DEBUG
 
 
 def log_set_up(verbose=False):
-    if not exists(TMP_DIR):
-        mkdir(TMP_DIR)
+    settings = get_settings()
+    if not exists(settings['save_path']):
+        mkdir(settings['save_path'])
 
-    logfile = "%s/touchandgo.log" % (TMP_DIR)
+    logfile = "%s/touchandgo.log" % (settings['save_path'])
     handler = RotatingFileHandler(logfile, maxBytes=1e6, backupCount=10)
     formatter = logging.Formatter("%(asctime)s  %(name)-22s  "
                                   "%(levelname)-8s %(message)s")

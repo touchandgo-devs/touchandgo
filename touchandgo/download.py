@@ -18,7 +18,7 @@ from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port, get_settings
 from touchandgo.logger import log_set_up
 from touchandgo.output import VLCOutput, OMXOutput, CastOutput
-from touchandgo.settings import DEBUG, TMP_DIR, WAIT_FOR_IT, \
+from touchandgo.settings import DEBUG, WAIT_FOR_IT, \
     DEFAULT_PORT
 from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
@@ -75,7 +75,7 @@ class DownloadManager(object):
 
     def init_handle(self):
         params = {
-            "save_path": TMP_DIR,
+            "save_path": self.settings['save_path'],
             "allocation": storage_mode_t.storage_mode_sparse,
             }
         self.session = session()
@@ -142,7 +142,7 @@ class DownloadManager(object):
         return biggest_file
 
     def wait_for_file(self):
-        while not exists(join(TMP_DIR, self.video_file[0])):
+        while not exists(join(self.settings['save_path'], self.video_file[0])):
             sleep(WAIT_FOR_IT)
 
     def output(self):
@@ -217,7 +217,7 @@ class DownloadManager(object):
 
     def get_video_path(self):
         video = self.video_file
-        video_path = join(TMP_DIR, video[0])
+        video_path = join(self.settings['save_path'], video[0])
         return video_path
 
     def guess(self, path):
