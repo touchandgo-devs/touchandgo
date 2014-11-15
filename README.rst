@@ -1,5 +1,6 @@
 Touchandgo
 ==========
+
 A python app and library to watch series and movies magically
 
 How to install
@@ -42,7 +43,7 @@ In your video player open http://<server address>:5000/crisis/1/5
 
 just enjoy it.
 
--------------------------------
+
 If you run Touchandgo in debug mode (with --verbose), 
 You will see this (see the screenshot)that we call"defrag". 
 Defrag shows the current pieces status.
@@ -54,3 +55,6 @@ Defrag shows the current pieces status.
 * # means that the piece is downloaded.
 * > means that the piece was served by http.
 
+Join the discussion
+-------------------
+touchandgo-devs@googlegroups.com or https://groups.google.com/forum/#!forum/touchandgo-devs
