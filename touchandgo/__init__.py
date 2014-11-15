@@ -88,8 +88,10 @@ def main():
         description="Command line tool to watch torrents")
     parser.add_argument("name", help="The name of the series or movie")
 
-    parser.add_argument("sea_ep", nargs='*', default=[None, None],
-                        help="Season and episode in the '1 24' format")
+    parser.add_argument("season_number", default=None, nargs="?", type=int,
+                        help="Season number")
+    parser.add_argument("episode_number", default=None, nargs="?", type=int,
+                        help="Episode number")
     parser.add_argument("--sub", nargs='?', default=None,
                         help="Subtitle language")
     parser.add_argument("--serve", action="store_true",
@@ -111,14 +113,13 @@ def main():
 
     log_set_up(args.verbose)
     log.info("Starting touchandgo")
-    log.info("Running Python %s on %r", sys.version_info, sys.platform)
-    log.info("Libtorrent version: %s", libtorrent_version)
+    log.debug("Running Python %s on %r", sys.version_info, sys.platform)
+    log.debug("Libtorrent version: %s", libtorrent_version)
 
-    episode = int(args.sea_ep[1]) if args.sea_ep[1] is not None else None
-    touchandgo = SearchAndStream(args.name, season=args.sea_ep[0],
-                                 episode=episode, sub_lang=args.sub,
-                                 serve=args.serve, quality=args.quality,
-                                 port=args.port,
+    touchandgo = SearchAndStream(args.name, season=args.season_number,
+                                 episode=args.episode_number,
+                                 sub_lang=args.sub, serve=args.serve,
+                                 quality=args.quality, port=args.port,
                                  player=args.player)
     if args.daemon:
         def callback():
