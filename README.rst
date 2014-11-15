@@ -1,5 +1,6 @@
 Touchandgo
 ==========
+
 A python app and library to watch series and movies magically
 
 How to install
