@@ -43,7 +43,7 @@ In your video player open http://<server address>:5000/crisis/1/5
 
 just enjoy it.
 
--------------------------------
+
 If you run Touchandgo in debug mode (with --verbose), 
 You will see this (see the screenshot)that we call"defrag". 
 Defrag shows the current pieces status.
