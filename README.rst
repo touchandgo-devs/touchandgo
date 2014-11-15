@@ -54,3 +54,6 @@ Defrag shows the current pieces status.
 * # means that the piece is downloaded.
 * > means that the piece was served by http.
 
+Join the discussion
+-------------------
+touchandgo-devs@googlegroups.com or https://groups.google.com/forum/#!forum/touchandgo-devs
