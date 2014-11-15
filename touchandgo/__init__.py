@@ -102,8 +102,6 @@ def main():
                         help="Daemonize the process"),
     parser.add_argument("--port", "-p", default="8888",
                         help="The port where the stream will be served")
-    parser.add_argument("--season", action="store_true",
-                        help="Stream next episode when this episode finishes")
     parser.add_argument("--verbose", action="store_true", default=None,
                         help="Show _all_ the logs")
     parser.add_argument("--player", default='vlc',
@@ -127,11 +125,7 @@ def main():
             touchandgo.watch()
         daemonize(args, callback)
     else:
-        play_next_episode = True
-        while play_next_episode:
-            touchandgo.watch()
-            touchandgo.episode += 1
-            play_next_episode = args.season
+        touchandgo.watch()
 
 if __name__ == '__main__':
     main()
