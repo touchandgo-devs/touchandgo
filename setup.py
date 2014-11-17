@@ -29,6 +29,7 @@ setup(
                       'pyaml',
                       'colorama',
                       'requests',
+                      'qtfaststart',
                       ],
     entry_points={
         'console_scripts': ['touchandgo = touchandgo.__init__:main',
