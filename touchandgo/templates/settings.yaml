@@ -1,6 +1,6 @@
 limits:
-    download: 2048
-    upload: 2048
+    download: 0
+    upload: 0
 players:
     default: vlc
 save_path: /tmp/touchandgo/

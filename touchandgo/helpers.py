@@ -27,6 +27,7 @@ log = logging.getLogger('touchandgo.helpers')
 def get_settings():
     settings_file = "%s/.touchandgo/settings.yaml" % os.getenv("HOME")
 
+    set_config_dir()
     if not exists(settings_file):
         default = join(dirname(__file__), "templates", "settings.yaml")
         copyfile(default, settings_file)
