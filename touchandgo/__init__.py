@@ -90,9 +90,24 @@ class SearchAndStream(object):
         except EpisodeNotFound, e:
             print "The episode you requested was not found"
         except QualityNotFound, e:
-            print "The torrent you requested was not found"
+            if self.quality is not None:
+                self.quality = self.get_next_quality()
+                print "Quality not found trying with less quality"
+                self.search_magnet()
+            else:
+                print "The torrent you requested was not found"
         except MovieNotFound, e:
             print "The movie you requested was not found"
+
+    def get_next_quality(self):
+        qualities = ["fullhd", "hd", None]
+
+        try:
+            new_quality = qualities[qualities.index(self.quality) + 1]
+        except IndexError:
+            new_quality = None
+
+        return new_quality
 
 
 def main():
