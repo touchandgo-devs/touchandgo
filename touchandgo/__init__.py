@@ -6,6 +6,8 @@ import sys
 from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
+from torrentmediasearcher.providers.base_api import ShowNotFound, \
+    EpisodeNotFound, QualityNotFound, MovieNotFound
 
 from libtorrent import version as libtorrent_version
 from touchandgo.helpers import daemonize, set_config_dir
@@ -67,20 +69,30 @@ class SearchAndStream(object):
 
     def search_magnet(self):
         log.info("Searching torrent")
-        search = TorrentMediaSearcher
-        if self.season is None and self.episode is None:
-            search.request_movie_magnet('torrentproject', self.name,
-                                        callback=self.download,
-                                        quality=self.quality)
-        else:
-            if self.quality is None:
-                quality = 'normal'
+        try:
+            search = TorrentMediaSearcher
+            if self.season is None and self.episode is None:
+                search.request_movie_magnet('torrentproject', self.name,
+                                            callback=self.download,
+                                            quality=self.quality)
             else:
-                quality = self.quality
-            search.request_tv_magnet(provider='eztv', show=self.name,
-                                     season=int(self.season),
-                                     episode=int(self.episode),
-                                     quality=quality, callback=self.download)
+                if self.quality is None:
+                    quality = 'normal'
+                else:
+                    quality = self.quality
+                search.request_tv_magnet(provider='eztv', show=self.name,
+                                        season=int(self.season),
+                                        episode=int(self.episode),
+                                        quality=quality,
+                                         callback=self.download)
+        except ShowNotFound, e:
+            print "The show you requested was not found"
+        except EpisodeNotFound, e:
+            print "The episode you requested was not found"
+        except QualityNotFound, e:
+            print "The torrent you requested was not found"
+        except MovieNotFound, e:
+            print "The movie you requested was not found"
 
 
 def main():
