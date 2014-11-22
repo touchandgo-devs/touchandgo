@@ -3,6 +3,8 @@ Touchandgo
 
 A python app and library to watch series and movies magically
 
+Read the full docs at http://touchandgo.rtfd.org
+
 How to install
 --------------
 
