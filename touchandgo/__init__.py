@@ -22,7 +22,7 @@ log = logging.getLogger('touchandgo.main')
 class SearchAndStream(object):
     def __init__(self, name, season=None, episode=None, sub_lang=None,
                  serve=False, quality=None, port=None, player=None,
-                 search=None):
+                 search=None, use_cache=True):
         self.name = name
         self.season = season
         self.episode = episode
@@ -32,6 +32,7 @@ class SearchAndStream(object):
         self.port = port
         self.player = player
         self.search_engine = search
+        self.use_cache = use_cache
 
         set_config_dir()
 
@@ -57,8 +58,10 @@ class SearchAndStream(object):
                 results = {'magnet': self.name}
                 self.download(results)
             else:
-                history = History.one(name=self.name, season=self.season,
-                                      episode=self.episode)
+                history = None
+                if self.use_cache:
+                    history = History.one(name=self.name, season=self.season,
+                                        episode=self.episode)
                 if history is None or not hasattr(history, "magnet"):
                     self.search_magnet()
                 else:
@@ -132,6 +135,8 @@ def main():
                         help="Player to use. vlc|omxplayer|chromecast")
     parser.add_argument("--search", default=None,
                         help="search lib to use")
+    parser.add_argument("--nocache", action="store_false", default=True,
+                        help="Daemonize the process"),
 
     args = parser.parse_args()
 
@@ -148,7 +153,8 @@ def main():
                                      episode=args.episode_number,
                                      sub_lang=args.sub, serve=args.serve,
                                      quality=args.quality, port=args.port,
-                                     player=args.player, search=args.search)
+                                     player=args.player, search=args.search,
+                                     use_cache=args.nocache)
         if args.daemon:
             def callback():
                 touchandgo.serve = True
