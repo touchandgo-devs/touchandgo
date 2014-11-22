@@ -37,7 +37,7 @@
       <div class="container">
         <div class="page-header">
           <h1>Touchandgo</h1>
-          <h2>Search <small>Search for a show or movie</small></h2>
+          <h2>Search <small> for a show or movie</small></h2>
         </div>
         <div class="container">
           <form class="form-inline" role="form">
@@ -47,7 +47,6 @@
               <input class="form-control" type="text" id="episode" placeholder="Episode">
             </div>
             <button id="play" class="btn btn-default">Play</button>
-            <button id="kill" class="btn btn-danger">Kill</button>
           </form>
         </div>
         <div class="container video">
@@ -80,7 +79,9 @@
         </div>
         <button type="button" class="btn btn-info" id="register">Register as browser magnet handler</button>
         <button type="button" class="btn btn-info" id="docs">Read the docs</button>
-        <button type="button" class="btn btn-warning" id="report">Report a bug</button> </div>
+        <button type="button" class="btn btn-warning" id="report">Report a bug</button>
+        <button id="kill" class="btn btn-danger">Kill current stream</button>
+    </div>
     </body>
     <script>
       var streamingURL = '';
