@@ -16,7 +16,7 @@ setup(
     author_email='felipelerena@gmail.com - mail@gilgamezh.me',
     packages=['touchandgo'],
     scripts=[],
-    url='http://github.com/touchandgo-devel/touchandgo/',
+    url='https://github.com/touchandgo-devs/touchandgo/',
     license='LICENSE.txt',
     long_description=open('README.rst').read(),
     install_requires=['TorrentMediaSearcher',
