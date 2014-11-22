@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Touchandgo’s documentation! &mdash; Touchandgo 0.7 documentation</title>
+    <title>Welcome to Touchandgo’s documentation! &mdash; Touchandgo 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7',
+        VERSION:     '0.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,30 +23,119 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Touchandgo 0.7 documentation" href="#" /> 
+    <link rel="top" title="Touchandgo 0.9 documentation" href="#" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="#">Touchandgo 0.7 documentation</a> &raquo;</li> 
+        <li><a href="#">Touchandgo 0.9 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="welcome-to-touchandgo-s-documentation">
 <h1>Welcome to Touchandgo&#8217;s documentation!<a class="headerlink" href="#welcome-to-touchandgo-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Touchandgo is a CLI application and python library to download and stream
+torrents</p>
+<div class="section" id="using-touchandgo">
+<h2>Using touchandgo<a class="headerlink" href="#using-touchandgo" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>touchandgo [movie name]
+touchandgo [series name] [season] [episode]
+
+E.g.:  touchandgo Crisis 1 5
+       touchandgo &quot;true blood&quot; 7 10
+       touchandgo &quot;true blood&quot; 7 10 --sub spa
+       touchandgo &quot;never ending story&quot;
+</pre></div>
+</div>
+<div class="section" id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>positional arguments:
+name                  The name of the series or movie
+season_number         Season number
+episode_number        Episode number
+
+optional arguments:
+-h, --help            show this help message and exit
+--sub [SUB]           Subtitle language
+--serve               Do not run VLC
+--quality [QUALITY]   quality of the video [normal|hd|fullhd]
+--daemon              Daemonize the process
+--port PORT, -p PORT  The port where the stream will be served
+--verbose             Show _all_ the logs
+--player PLAYER       Player to use. vlc|omxplayer|chromecast
+--search SEARCH       search lib to use
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="how-to-run-streaming-proxy">
+<h2>How to run streaming proxy<a class="headerlink" href="#how-to-run-streaming-proxy" title="Permalink to this headline">¶</a></h2>
+<p>In the command line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tsproxy</span>
+</pre></div>
+</div>
+<p>In your browser open <a class="reference external" href="http:/">http:/</a>/&lt;server address&gt;:5000 to use de web UI</p>
+<p>In your video player open <a class="reference external" href="http:/">http:/</a>/&lt;server address&gt;:5000/crisis/1/5 Equivalent to
+&#8220;touchandgo Crisis 1 5&#8221; but directly in the player :D</p>
+<p>just enjoy it.</p>
+</div>
+<div class="section" id="requierements">
+<h2>Requierements<a class="headerlink" href="#requierements" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ubuntu">
+<h3>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
+<li>python-libtorrent</li>
+<li>python-dev</li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install python-libtorrent python-dev
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="how-to-install">
+<h2>How to install<a class="headerlink" href="#how-to-install" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>pip install touchandgo
+</pre></div>
+</div>
+</div>
+<div class="section" id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<p>If you run Touchandgo in debug mode (with &#8211;verbose),
+You will see this (see the screenshot)that we call&#8221;defrag&#8221;.
+Defrag shows the current pieces status.</p>
+<img alt="./screenshots/touchandgo.png" src="./screenshots/touchandgo.png" />
+<ul class="simple">
+<li>The number shows the piece priority. 1 is the lowest and 7 the highest.</li>
+<li>v means that the piece is downloading.</li>
+<li># means that the piece is downloaded.</li>
+<li>&gt; means that the piece was served by http.</li>
+</ul>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/touchandgo-devs/touchandgo/">https://github.com/touchandgo-devs/touchandgo/</a></p>
+</div>
+<div class="section" id="join-the-discussion">
+<h2>Join the discussion<a class="headerlink" href="#join-the-discussion" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="mailto:touchandgo-devs&#37;&#52;&#48;googlegroups&#46;com">touchandgo-devs<span>&#64;</span>googlegroups<span>&#46;</span>com</a> or <a class="reference external" href="https://groups.google.com/forum/#!forum/touchandgo-devs">https://groups.google.com/forum/#!forum/touchandgo-devs</a></p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul class="simple">
 </ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -62,20 +151,37 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to Touchandgo&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#">Welcome to Touchandgo&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#using-touchandgo">Using touchandgo</a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to-run-streaming-proxy">How to run streaming proxy</a></li>
+<li><a class="reference internal" href="#requierements">Requierements</a><ul>
+<li><a class="reference internal" href="#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to-install">How to install</a></li>
+<li><a class="reference internal" href="#debugging">Debugging</a></li>
+<li><a class="reference internal" href="#contribute">Contribute</a></li>
+<li><a class="reference internal" href="#join-the-discussion">Join the discussion</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -92,18 +198,18 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="#">Touchandgo 0.7 documentation</a> &raquo;</li> 
+        <li><a href="#">Touchandgo 0.9 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Touchango devs.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b1.
     </div>
   </body>
 </html>
