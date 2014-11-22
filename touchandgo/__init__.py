@@ -8,6 +8,8 @@ from libtorrent import version as libtorrent_version
 from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
+from torrentmediasearcher.providers.base_api import ShowNotFound, \
+    EpisodeNotFound, QualityNotFound, MovieNotFound
 
 from touchandgo.helpers import daemonize, set_config_dir
 from touchandgo.history import History
@@ -68,20 +70,45 @@ class SearchAndStream(object):
 
     def search_magnet(self):
         log.info("Searching torrent")
-        search = TorrentMediaSearcher
-        if self.season is None and self.episode is None:
-            search.request_movie_magnet('torrentproject', self.name,
-                                        callback=self.download,
-                                        quality=self.quality)
-        else:
-            if self.quality is None:
-                quality = 'normal'
+        try:
+            search = TorrentMediaSearcher
+            if self.season is None and self.episode is None:
+                search.request_movie_magnet('torrentproject', self.name,
+                                            callback=self.download,
+                                            quality=self.quality)
             else:
-                quality = self.quality
-            search.request_tv_magnet(provider='eztv', show=self.name,
-                                     season=int(self.season),
-                                     episode=int(self.episode),
-                                     quality=quality, callback=self.download)
+                if self.quality is None:
+                    quality = 'normal'
+                else:
+                    quality = self.quality
+                search.request_tv_magnet(provider='eztv', show=self.name,
+                                        season=int(self.season),
+                                        episode=int(self.episode),
+                                        quality=quality,
+                                         callback=self.download)
+        except ShowNotFound, e:
+            print "The show you requested was not found"
+        except EpisodeNotFound, e:
+            print "The episode you requested was not found"
+        except QualityNotFound, e:
+            if self.quality is not None:
+                self.quality = self.get_next_quality()
+                print "Quality not found trying with less quality"
+                self.search_magnet()
+            else:
+                print "The torrent you requested was not found"
+        except MovieNotFound, e:
+            print "The movie you requested was not found"
+
+    def get_next_quality(self):
+        qualities = ["fullhd", "hd", None]
+
+        try:
+            new_quality = qualities[qualities.index(self.quality) + 1]
+        except IndexError:
+            new_quality = None
+
+        return new_quality
 
 
 def main():
