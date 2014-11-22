@@ -3,11 +3,12 @@ import argparse
 import logging
 import sys
 
+from babelfish import Language
+from libtorrent import version as libtorrent_version
 from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
-from libtorrent import version as libtorrent_version
 from touchandgo.helpers import daemonize, set_config_dir
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
@@ -114,18 +115,24 @@ def main():
     log.debug("Running Python %s on %r", sys.version_info, sys.platform)
     log.debug("Libtorrent version: %s", libtorrent_version)
 
-    touchandgo = SearchAndStream(args.name, season=args.season_number,
-                                 episode=args.episode_number,
-                                 sub_lang=args.sub, serve=args.serve,
-                                 quality=args.quality, port=args.port,
-                                 player=args.player)
-    if args.daemon:
-        def callback():
-            touchandgo.serve = True
+    try:
+        if args.sub is not None:
+            Language(args.sub)
+
+        touchandgo = SearchAndStream(args.name, season=args.season_number,
+                                     episode=args.episode_number,
+                                     sub_lang=args.sub, serve=args.serve,
+                                     quality=args.quality, port=args.port,
+                                     player=args.player)
+        if args.daemon:
+            def callback():
+                touchandgo.serve = True
+                touchandgo.watch()
+            daemonize(args, callback)
+        else:
             touchandgo.watch()
-        daemonize(args, callback)
-    else:
-        touchandgo.watch()
+    except ValueError, e:
+        print e
 
 if __name__ == '__main__':
     main()
