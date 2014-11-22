@@ -36,7 +36,8 @@
     <body>
       <div class="container">
         <div class="page-header">
-          <h1>Search <small>Search for a show or movie</small></h1>
+          <h1>Touchandgo</h1>
+          <h2>Search <small>Search for a show or movie</small></h2>
         </div>
         <div class="container">
           <form class="form-inline" role="form">
@@ -58,7 +59,7 @@
           </div>
         </div>
         <div class="page-header">
-          <h1>History <small> These are your last played items</small></h1>
+          <h2>History <small> These are your last played items</small></h2>
         </div>
         <div class="container history">
         {%for item in items%}
@@ -77,8 +78,9 @@
           </div>
         {%endfor%}
         </div>
-        <button type="button" class="btn btn-info" id="register">Register</button>
-      </div>
+        <button type="button" class="btn btn-info" id="register">Register as browser magnet handler</button>
+        <button type="button" class="btn btn-info" id="docs">Read the docs</button>
+        <button type="button" class="btn btn-warning" id="report">Report a bug</button> </div>
     </body>
     <script>
       var streamingURL = '';
@@ -95,6 +97,12 @@
         e.preventDefault();
         streamingURL = this.href;
         loadVideo(this.href);
+      });
+      $('#docs').on('click', function(e){
+        location.href='http://touchandgo.rtfd.org'
+      });
+      $('#report').on('click', function(e){
+        location.href='http://github.com/touchandgo-devs/touchandgo/issues/new'
       });
 
       $('#kill').on('click',  function(e){
