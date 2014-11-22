@@ -4,12 +4,11 @@ import logging
 import sys
 
 from babelfish import Language
+from KickassAPI import Search
 from libtorrent import version as libtorrent_version
 from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
-from torrentmediasearcher.providers.base_api import ShowNotFound, \
-    EpisodeNotFound, QualityNotFound, MovieNotFound
 
 from touchandgo.helpers import daemonize, set_config_dir
 from touchandgo.history import History
@@ -22,7 +21,8 @@ log = logging.getLogger('touchandgo.main')
 
 class SearchAndStream(object):
     def __init__(self, name, season=None, episode=None, sub_lang=None,
-                 serve=False, quality=None, port=None, player=None):
+                 serve=False, quality=None, port=None, player=None,
+                 search=None):
         self.name = name
         self.season = season
         self.episode = episode
@@ -31,6 +31,7 @@ class SearchAndStream(object):
         self.quality = quality
         self.port = port
         self.player = player
+        self.search_engine = search
 
         set_config_dir()
 
@@ -70,45 +71,40 @@ class SearchAndStream(object):
 
     def search_magnet(self):
         log.info("Searching torrent")
-        try:
-            search = TorrentMediaSearcher
-            if self.season is None and self.episode is None:
-                search.request_movie_magnet('torrentproject', self.name,
-                                            callback=self.download,
-                                            quality=self.quality)
+        if self.search_engine == "kat":
+            self.kat_search()
+        else:
+            self.tms_search()
+
+    def get_search_string(self):
+        search_string = self.name
+        if self.season is not None and self.episode is not None:
+            search_string += " s%se%s" % (str(self.season).zfill(2),
+                                          str(self.episode).zfill(2))
+        return search_string
+
+    def kat_search(self):
+        search_string = self.get_search_string()
+        log.info("Searching %s", search_string)
+        results = Search(search_string).list()
+        results = {'magnet': results[0].magnet_link}
+        self.download(results)
+
+    def tms_search(self):
+        search = TorrentMediaSearcher
+        if self.season is None and self.episode is None:
+            search.request_movie_magnet('torrentproject', self.name,
+                                        callback=self.download,
+                                        quality=self.quality)
+        else:
+            if self.quality is None:
+                quality = 'normal'
             else:
-                if self.quality is None:
-                    quality = 'normal'
-                else:
-                    quality = self.quality
-                search.request_tv_magnet(provider='eztv', show=self.name,
-                                        season=int(self.season),
-                                        episode=int(self.episode),
-                                        quality=quality,
-                                         callback=self.download)
-        except ShowNotFound, e:
-            print "The show you requested was not found"
-        except EpisodeNotFound, e:
-            print "The episode you requested was not found"
-        except QualityNotFound, e:
-            if self.quality is not None:
-                self.quality = self.get_next_quality()
-                print "Quality not found trying with less quality"
-                self.search_magnet()
-            else:
-                print "The torrent you requested was not found"
-        except MovieNotFound, e:
-            print "The movie you requested was not found"
-
-    def get_next_quality(self):
-        qualities = ["fullhd", "hd", None]
-
-        try:
-            new_quality = qualities[qualities.index(self.quality) + 1]
-        except IndexError:
-            new_quality = None
-
-        return new_quality
+                quality = self.quality
+            search.request_tv_magnet(provider='eztv', show=self.name,
+                                     season=int(self.season),
+                                     episode=int(self.episode),
+                                     quality=quality, callback=self.download)
 
 
 def main():
@@ -133,7 +129,9 @@ def main():
     parser.add_argument("--verbose", action="store_true", default=None,
                         help="Show _all_ the logs")
     parser.add_argument("--player", default='vlc',
-                        help="Player to use. vlc|omxplayer")
+                        help="Player to use. vlc|omxplayer|chromecast")
+    parser.add_argument("--search", default=None,
+                        help="search lib to use")
 
     args = parser.parse_args()
 
@@ -150,7 +148,7 @@ def main():
                                      episode=args.episode_number,
                                      sub_lang=args.sub, serve=args.serve,
                                      quality=args.quality, port=args.port,
-                                     player=args.player)
+                                     player=args.player, search=args.search)
         if args.daemon:
             def callback():
                 touchandgo.serve = True

@@ -30,6 +30,8 @@ setup(
                       'colorama',
                       'requests',
                       'qtfaststart',
+                      'KickassAPI',
+                      'pyQuery',
                       ],
     entry_points={
         'console_scripts': ['touchandgo = touchandgo.__init__:main',
