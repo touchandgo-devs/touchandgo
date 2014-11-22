@@ -136,7 +136,7 @@ def main():
     parser.add_argument("--search", default=None,
                         help="search lib to use")
     parser.add_argument("--nocache", action="store_false", default=True,
-                        help="Daemonize the process"),
+                        help="Search again for the torrent"),
 
     args = parser.parse_args()
 
