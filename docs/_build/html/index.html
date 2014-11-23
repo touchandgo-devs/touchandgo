@@ -71,8 +71,9 @@ optional arguments:
 --daemon              Daemonize the process
 --port PORT, -p PORT  The port where the stream will be served
 --verbose             Show _all_ the logs
---player PLAYER       Player to use. vlc|omxplayer|chromecast
---search SEARCH       search lib to use
+--search SEARCH       search lib to use (only option right now is &#39;kat&#39; for
+                      kickass torrents)
+--nocache             Search for the torrent again
 </pre></div>
 </div>
 </div>
@@ -116,7 +117,10 @@ optional arguments:
 <p>If you run Touchandgo in debug mode (with &#8211;verbose),
 You will see this (see the screenshot)that we call&#8221;defrag&#8221;.
 Defrag shows the current pieces status.</p>
-<img alt="./screenshots/touchandgo.png" src="./screenshots/touchandgo.png" />
+<div class="figure align-center" id="id1">
+<img alt="_images/touchandgo.png" src="_images/touchandgo.png" />
+<p class="caption"><span class="caption-text"><em>example of the command line output</em></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
 <ul class="simple">
 <li>The number shows the piece priority. 1 is the lowest and 7 the highest.</li>
 <li>v means that the piece is downloading.</li>
