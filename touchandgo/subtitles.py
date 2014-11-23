@@ -33,8 +33,12 @@ class SubtitleDownloader(object):
         except ValueError:
             pass
         if subtitle is not None and len(subtitle):
-            subtitle = get_subtitle_path(join(download_dir, video.name))
-        log.info("video_file: %s, filepath: %s, guess: %s, video: %s"
+            log.info("CLAH %s %s", download_dir, video.name)
+            subtitle = get_subtitle_path(join(download_dir,
+                                              video.name.replace("(", "\(")
+                                              .replace(")", "\)")
+                                              .replace(" ", "\ ")))
+        log.info("video_file: %s, filepath: %s, guess: %s, video: %s, "
                  "subtitle: %s", video_file, filepath, guess, video, subtitle)
         return subtitle
 
