@@ -1,5 +1,5 @@
 import logging
-from touchandgo.helpers import have_moov
+from touchandgo.helpers import have_moov, get_settings
 
 
 log = logging.getLogger('touchandgo.strategy')
@@ -7,12 +7,13 @@ log = logging.getLogger('touchandgo.strategy')
 
 class DefaultStrategy(object):
     def __init__(self, manager):
+        self.settings = get_settings()['strategy']
         self.manager = manager
-        self.piece_st = 4
-        self.last_piece_st = 2
+        self.piece_st = self.settings['piece_st']
+        self.last_piece_st = self.settings['last_piece_st']
         self.holding_stream = True
         self.handle = manager.handle
-        self.chunks_strat = 10
+        self.chunks_strat = self.settings['chunks_strat']
         self.moov_downloaded = False
         self.download_lasts = False
 
@@ -49,7 +50,8 @@ class DefaultStrategy(object):
                 log.debug("Moov Downloaded = %s", self.moov_downloaded)
 
             if self.moov_downloaded:
-                self.handle.set_sequential_download(False)
+                if not self.settings['always_sequential']:
+                    self.handle.set_sequential_download(False)
                 if not self.holding_stream:
                     self.piece_st += self.chunks_strat
                 else:
@@ -81,7 +83,6 @@ class DefaultStrategy(object):
         self.reset_priorities()
         self.piece_st = first_block
 
-        #self.handle.set_sequential_download(True)
         status = self.handle.status()
         last_piece = len(status.pieces) - 1
 
