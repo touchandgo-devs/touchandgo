@@ -40,21 +40,19 @@ class DefaultStrategy(object):
             last_n = pieces[-self.last_piece_st:]
         else:
             last_n = []
-
         if all(first_n) and all(last_n):
             log.debug("first_n downloaded")
             if not self.moov_downloaded:
                 video_file = self.manager.get_video_path()
                 self.moov_downloaded = have_moov(video_file)
                 log.debug("Moov Downloaded = %s", self.moov_downloaded)
-
             if self.moov_downloaded:
                 self.handle.set_sequential_download(False)
-                if not self.holding_stream:
-                    self.piece_st += self.chunks_strat
-                else:
+                if self.holding_stream:
                     self.holding_stream = False
                     self.manager.stream()
+                if self.piece_st > 4:
+                    self.piece_st += self.chunks_strat
                 self.move_strategy(self.piece_st)
             else:
                 log.debug("video doesn't have moov yet. Extending first_n")
@@ -63,7 +61,7 @@ class DefaultStrategy(object):
                     self.handle.set_piece_deadline(i, 3000)
 
                 for i in range(self.piece_st):
-                    self.handle.piece_priority(i, 7)
+                    self.handle.piece_priority(i, 3)
                     self.handle.set_piece_deadline(i, 3000)
 
                 self.piece_st *= 2
@@ -79,7 +77,6 @@ class DefaultStrategy(object):
     def move_strategy(self, first_block):
         log.debug("moving strategy %s" % first_block)
         self.reset_priorities()
-        self.piece_st = first_block
 
         #self.handle.set_sequential_download(True)
         status = self.handle.status()
@@ -88,7 +85,6 @@ class DefaultStrategy(object):
         last_chunks = first_block + self.chunks_strat
         if last_chunks > last_piece:
             last_chunks = last_piece
-
         for i in range(first_block, last_chunks):
             self.handle.piece_priority(i, 7)
             self.handle.set_piece_deadline(i, 10000)
@@ -99,3 +95,5 @@ class DefaultStrategy(object):
         for i in range(first_block+self.chunks_strat, last_chunks):
             self.handle.piece_priority(i, 3)
             #self.handle.set_piece_deadline(i, 20000)
+
+        self.piece_st = first_block + self.chunks_strat
