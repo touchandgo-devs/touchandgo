@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 import argparse
 import logging
 import requests
@@ -25,7 +25,7 @@ log = logging.getLogger('touchandgo.proxy')
 def serve(py_exec=None):
     log_set_up(True)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--python", default="python")
+    parser.add_argument("--python", default="python2")
     args = parser.parse_args()
 
     py_exec = args.python
