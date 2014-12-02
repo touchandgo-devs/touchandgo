@@ -3,7 +3,6 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 Ojota==2.0.1
 TorrentMediaSearcher==1.0.3
--e git+https://github.com/touchandgo-devs/touchandgo.git@b88cff4a61be529977c84e192c1331154bfc11e5#egg=Touchandgo-dev
 Werkzeug==0.9.6
 argparse==1.2.1
 babelfish==0.4.0
