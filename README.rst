@@ -12,7 +12,7 @@ How to install
   linux distro)
   pip install touchandgo
   (pip needs python-dev package to compile some libraries. If you don't 
-  have installed run "sudo sudo apt-get install python-dev")
+  have installed run "sudo apt-get install python-dev")
 
 
 How to use
