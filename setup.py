@@ -32,6 +32,7 @@ setup(
                       'qtfaststart',
                       'KickassAPI',
                       'pyQuery',
+                      'altasetting',
                       ],
     entry_points={
         'console_scripts': ['touchandgo = touchandgo.__init__:main',
