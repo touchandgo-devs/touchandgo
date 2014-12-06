@@ -18,8 +18,7 @@ from touchandgo.constants import STATES
 from touchandgo.helpers import is_port_free, get_free_port, get_settings
 from touchandgo.logger import log_set_up
 from touchandgo.output import VLCOutput, OMXOutput, CastOutput
-from touchandgo.settings import DEBUG, WAIT_FOR_IT, \
-    DEFAULT_PORT
+from touchandgo.settings import DEBUG, WAIT_FOR_IT, DEFAULT_PORT
 from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
 from touchandgo.subtitles import SubtitleDownloader
@@ -49,7 +48,7 @@ class DownloadManager(object):
         self.port = port
         self.serve = serve
         if player is None:
-            player = self.settings['players']['default']
+            player = self.settings.players.default
         self.player = player
 
         # number of pieces to wait until start streaming
@@ -75,16 +74,16 @@ class DownloadManager(object):
 
     def init_handle(self):
         params = {
-            "save_path": self.settings['save_path'],
+            "save_path": self.settings.save_path,
             "allocation": storage_mode_t.storage_mode_sparse,
             }
         self.session = session()
         self.handle = add_magnet_uri(self.session, str(self.magnet), params)
 
-        up_limit = self.settings['limits']['upload']
+        up_limit = self.settings.limits.upload
         if up_limit:
             self.handle.set_upload_limit(up_limit)
-        down_limit = self.settings['limits']['download']
+        down_limit = self.settings.limits.download
         if down_limit:
             self.handle.set_download_limit(down_limit)
 
@@ -116,7 +115,7 @@ class DownloadManager(object):
                 if not self.streaming and is_seed:
                     self.stream()
 
-                print("\n" * 80)
+                #print("\n" * 80)
                 print(self.stats(DEBUG))
                 sleep(1)
         except KeyboardInterrupt:
@@ -142,7 +141,7 @@ class DownloadManager(object):
         return biggest_file
 
     def wait_for_file(self):
-        while not exists(join(self.settings['save_path'], self.video_file[0])):
+        while not exists(join(self.settings.save_path, self.video_file[0])):
             sleep(WAIT_FOR_IT)
 
     def output(self):
@@ -178,8 +177,8 @@ class DownloadManager(object):
         self._served_blocks[block] = True
 
     def defrag(self):
-        downloading = [piece['piece_index'] for piece in
-                       self.handle.get_download_queue()]
+        download_queue = self.handle.get_download_queue()
+        downloading = [piece['piece_index'] for piece in download_queue]
         numerales = ""
         pieces = self.status.pieces
         for i, piece in enumerate(pieces):
@@ -217,7 +216,7 @@ class DownloadManager(object):
 
     def get_video_path(self):
         video = self.video_file
-        video_path = join(self.settings['save_path'], video[0])
+        video_path = join(self.settings.save_path, video[0])
         return video_path
 
     def guess(self, path):

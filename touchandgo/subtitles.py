@@ -21,7 +21,7 @@ class SubtitleDownloader(object):
     def download(self, video_file):
         subtitle = None
         settings = get_settings()
-        download_dir = settings['save_path']
+        download_dir = settings.save_path
         log.info("Downloading subtitle")
         filepath = join(download_dir, video_file[0])
         guess = guess_video_info(filepath, info=['filename'])
