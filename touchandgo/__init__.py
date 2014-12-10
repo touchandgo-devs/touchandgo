@@ -10,7 +10,7 @@ from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
-from touchandgo.helpers import daemonize, set_config_dir
+from touchandgo.helpers import daemonize, set_config_dir, get_settings
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
 from touchandgo.logger import log_set_up
@@ -31,6 +31,9 @@ class SearchAndStream(object):
         self.quality = quality
         self.port = port
         self.player = player
+        if search is None:
+            settings = get_settings()
+            search = settings.default_search_engine
         self.search_engine = search
         self.use_cache = use_cache
 
