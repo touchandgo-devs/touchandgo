@@ -4,3 +4,9 @@ limits:
 players:
     default: vlc
 save_path: /tmp/touchandgo/
+strategy:
+    always_sequential: No
+    piece_st: 4
+    last_piece_st: 2
+    chunks_strat: 10
+default_search_engine: kat

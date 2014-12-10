@@ -21,7 +21,7 @@ class SubtitleDownloader(object):
     def download(self, video_file):
         subtitle = None
         settings = get_settings()
-        download_dir = settings['save_path']
+        download_dir = settings.save_path
         log.info("Downloading subtitle")
         filepath = join(download_dir, video_file[0])
         guess = guess_video_info(filepath, info=['filename'])
@@ -33,8 +33,12 @@ class SubtitleDownloader(object):
         except ValueError:
             pass
         if subtitle is not None and len(subtitle):
-            subtitle = get_subtitle_path(join(download_dir, video.name))
-        log.info("video_file: %s, filepath: %s, guess: %s, video: %s"
+            log.info("CLAH %s %s", download_dir, video.name)
+            subtitle = get_subtitle_path(join(download_dir,
+                                              video.name.replace("(", "\(")
+                                              .replace(")", "\)")
+                                              .replace(" ", "\ ")))
+        log.info("video_file: %s, filepath: %s, guess: %s, video: %s, "
                  "subtitle: %s", video_file, filepath, guess, video, subtitle)
         return subtitle
 

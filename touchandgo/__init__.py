@@ -3,12 +3,14 @@ import argparse
 import logging
 import sys
 
+from babelfish import Language
+from KickassAPI import Search
+from libtorrent import version as libtorrent_version
 from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
-from libtorrent import version as libtorrent_version
-from touchandgo.helpers import daemonize, set_config_dir
+from touchandgo.helpers import daemonize, set_config_dir, get_settings
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
 from touchandgo.logger import log_set_up
@@ -19,7 +21,8 @@ log = logging.getLogger('touchandgo.main')
 
 class SearchAndStream(object):
     def __init__(self, name, season=None, episode=None, sub_lang=None,
-                 serve=False, quality=None, port=None, player=None):
+                 serve=False, quality=None, port=None, player=None,
+                 search=None, use_cache=True):
         self.name = name
         self.season = season
         self.episode = episode
@@ -28,6 +31,11 @@ class SearchAndStream(object):
         self.quality = quality
         self.port = port
         self.player = player
+        if search is None:
+            settings = get_settings()
+            search = settings.default_search_engine
+        self.search_engine = search
+        self.use_cache = use_cache
 
         set_config_dir()
 
@@ -53,8 +61,10 @@ class SearchAndStream(object):
                 results = {'magnet': self.name}
                 self.download(results)
             else:
-                history = History.one(name=self.name, season=self.season,
-                                      episode=self.episode)
+                history = None
+                if self.use_cache:
+                    history = History.one(name=self.name, season=self.season,
+                                        episode=self.episode)
                 if history is None or not hasattr(history, "magnet"):
                     self.search_magnet()
                 else:
@@ -67,6 +77,26 @@ class SearchAndStream(object):
 
     def search_magnet(self):
         log.info("Searching torrent")
+        if self.search_engine == "kat":
+            self.kat_search()
+        else:
+            self.tms_search()
+
+    def get_search_string(self):
+        search_string = self.name
+        if self.season is not None and self.episode is not None:
+            search_string += " s%se%s" % (str(self.season).zfill(2),
+                                          str(self.episode).zfill(2))
+        return search_string
+
+    def kat_search(self):
+        search_string = self.get_search_string()
+        log.info("Searching %s", search_string)
+        results = Search(search_string).list()
+        results = {'magnet': results[0].magnet_link}
+        self.download(results)
+
+    def tms_search(self):
         search = TorrentMediaSearcher
         if self.season is None and self.episode is None:
             search.request_movie_magnet('torrentproject', self.name,
@@ -105,7 +135,11 @@ def main():
     parser.add_argument("--verbose", action="store_true", default=None,
                         help="Show _all_ the logs")
     parser.add_argument("--player", default='vlc',
-                        help="Player to use. vlc|omxplayer")
+                        help="Player to use. vlc|omxplayer|chromecast")
+    parser.add_argument("--search", default=None,
+                        help="search lib to use (only option right now is 'kat' for kickass torrents)")
+    parser.add_argument("--nocache", action="store_false", default=True,
+                        help="Search for the torrent again"),
 
     args = parser.parse_args()
 
@@ -114,18 +148,25 @@ def main():
     log.debug("Running Python %s on %r", sys.version_info, sys.platform)
     log.debug("Libtorrent version: %s", libtorrent_version)
 
-    touchandgo = SearchAndStream(args.name, season=args.season_number,
-                                 episode=args.episode_number,
-                                 sub_lang=args.sub, serve=args.serve,
-                                 quality=args.quality, port=args.port,
-                                 player=args.player)
-    if args.daemon:
-        def callback():
-            touchandgo.serve = True
+    try:
+        if args.sub is not None:
+            Language(args.sub)
+
+        touchandgo = SearchAndStream(args.name, season=args.season_number,
+                                     episode=args.episode_number,
+                                     sub_lang=args.sub, serve=args.serve,
+                                     quality=args.quality, port=args.port,
+                                     player=args.player, search=args.search,
+                                     use_cache=args.nocache)
+        if args.daemon:
+            def callback():
+                touchandgo.serve = True
+                touchandgo.watch()
+            daemonize(args, callback)
+        else:
             touchandgo.watch()
-        daemonize(args, callback)
-    else:
-        touchandgo.watch()
+    except ValueError, e:
+        print e
 
 if __name__ == '__main__':
     main()

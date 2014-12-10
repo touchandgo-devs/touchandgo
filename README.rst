@@ -3,6 +3,8 @@ Touchandgo
 
 A python app and library to watch series and movies magically
 
+Read the full docs at http://touchandgo.rtfd.org
+
 How to install
 --------------
 
@@ -48,7 +50,7 @@ If you run Touchandgo in debug mode (with --verbose),
 You will see this (see the screenshot)that we call"defrag". 
 Defrag shows the current pieces status.
 
-.. image:: ./screenshots/touchandgo.png
+.. image:: ./docs/screenshots/touchandgo.png
 
 * The number shows the piece priority. 1 is the lowest and 7 the highest.
 * v means that the piece is downloading.

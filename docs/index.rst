@@ -42,7 +42,9 @@ Parameters
     --port PORT, -p PORT  The port where the stream will be served
     --verbose             Show _all_ the logs
     --player PLAYER       Player to use. vlc|omxplayer|chromecast
-    --search SEARCH       search lib to use
+    --search SEARCH       search lib to use (only option right now is 'kat' for
+                          kickass torrents)
+    --nocache             Search for the torrent again
 
 
 How to run streaming proxy
@@ -75,12 +77,25 @@ Ubuntu
 
     sudo apt-get install python-libtorrent python-dev
 
+<<<<<<< HEAD
+=======
+Archlinux
++++++++++
+    * libtorrent-rasterbar
+    * base-devel (pip need it to compile some packages)
+    * python-pip2
+
+  ::
+
+    sudo pacman -Sy libtorrent-rasterbar base-devel python-pip2
+
+>>>>>>> devel
 How to install
 --------------
 
 ::
 
-  pip install touchandgo
+  pip2 install touchandgo
 
 
 Debugging
@@ -90,7 +105,10 @@ If you run Touchandgo in debug mode (with --verbose),
 You will see this (see the screenshot)that we call"defrag". 
 Defrag shows the current pieces status.
 
-.. image:: ./screenshots/touchandgo.png
+.. figure:: screenshots/touchandgo.png
+    :align: center
+
+    *Example of the command line output*
 
 * The number shows the piece priority. 1 is the lowest and 7 the highest.
 * v means that the piece is downloading.
