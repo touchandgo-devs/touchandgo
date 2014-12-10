@@ -11,10 +11,10 @@ from touchandgo.settings import DEBUG
 
 def log_set_up(verbose=False):
     settings = get_settings()
-    if not exists(settings['save_path']):
-        mkdir(settings['save_path'])
+    if not exists(settings.save_path):
+        mkdir(settings.save_path)
 
-    logfile = "%s/touchandgo.log" % (settings['save_path'])
+    logfile = "%s/touchandgo.log" % (settings.save_path)
     handler = RotatingFileHandler(logfile, maxBytes=1e6, backupCount=10)
     formatter = logging.Formatter("%(asctime)s  %(name)-22s  "
                                   "%(levelname)-8s %(message)s")
