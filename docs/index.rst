@@ -77,12 +77,22 @@ Ubuntu
 
     sudo apt-get install python-libtorrent python-dev
 
+Archlinux
++++++++++
+    * libtorrent-rasterbar
+    * base-devel (pip need it to compile some packages)
+    * python-pip2
+
+  ::
+
+    sudo pacman -Sy libtorrent-rasterbar base-devel python-pip2
+
 How to install
 --------------
 
 ::
 
-  pip install touchandgo
+  pip2 install touchandgo
 
 
 Debugging
