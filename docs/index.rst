@@ -81,7 +81,7 @@ Archlinux
 +++++++++
     * libtorrent-rasterbar
     * base-devel (pip need it to compile some packages)
-    * python-pip2
+    * python2-pip
 
   ::
 
