@@ -14,6 +14,7 @@ from touchandgo.helpers import daemonize, set_config_dir, get_settings
 from touchandgo.history import History
 from touchandgo.download import DownloadManager
 from touchandgo.logger import log_set_up
+from touchandgo.strike import StrikeAPI
 
 
 log = logging.getLogger('touchandgo.main')
@@ -64,7 +65,7 @@ class SearchAndStream(object):
                 history = None
                 if self.use_cache:
                     history = History.one(name=self.name, season=self.season,
-                                        episode=self.episode)
+                                          episode=self.episode)
                 if history is None or not hasattr(history, "magnet"):
                     self.search_magnet()
                 else:
@@ -79,6 +80,8 @@ class SearchAndStream(object):
         log.info("Searching torrent")
         if self.search_engine == "kat":
             self.kat_search()
+        elif self.search_engine == "strike":
+            self.strike_search()
         else:
             self.tms_search()
 
@@ -91,9 +94,17 @@ class SearchAndStream(object):
 
     def kat_search(self):
         search_string = self.get_search_string()
-        log.info("Searching %s", search_string)
+        log.info("Searching %s on Kickass", search_string)
         results = Search(search_string).list()
         results = {'magnet': results[0].magnet_link}
+        self.download(results)
+
+    def strike_search(self):
+        search_string = self.get_search_string()
+        log.info("Searching %s on Strike", search_string)
+        strike = StrikeAPI(search_string)
+        magnet = strike.get_first_torrent_magnet()
+        results = {'magnet': magnet}
         self.download(results)
 
     def tms_search(self):
