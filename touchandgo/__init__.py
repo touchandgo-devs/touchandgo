@@ -10,9 +10,10 @@ from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
 
-from touchandgo.helpers import daemonize, set_config_dir, get_settings
-from touchandgo.history import History
+from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
+from touchandgo.helpers import daemonize, get_settings
+from touchandgo.history import History
 from touchandgo.logger import log_set_up
 from touchandgo.strike import StrikeAPI
 
@@ -21,6 +22,8 @@ log = logging.getLogger('touchandgo.main')
 
 
 class SearchAndStream(object):
+    """Searchs a torrent and start streaming it"""
+    @with_config_dir
     def __init__(self, name, season=None, episode=None, sub_lang=None,
                  serve=False, quality=None, port=None, player=None,
                  search=None, use_cache=True):
@@ -38,14 +41,11 @@ class SearchAndStream(object):
         self.search_engine = search
         self.use_cache = use_cache
 
-        set_config_dir()
-
+    @with_config_dir
     def download(self, results):
         log.info("Processing magnet link")
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
-
-        set_config_dir()
 
         history = History(date=int(time()), name=self.name, season=self.season,
                           episode=self.episode, magnet=magnet)
@@ -96,6 +96,7 @@ class SearchAndStream(object):
         search_string = self.get_search_string()
         log.info("Searching %s on Kickass", search_string)
         results = Search(search_string).list()
+        print results
         results = {'magnet': results[0].magnet_link}
         self.download(results)
 
