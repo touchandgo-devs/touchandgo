@@ -30,7 +30,7 @@ class VideoHandler(SimpleHTTPRequestHandler):
     def handle_one_request(self, *args, **kwargs):
         try:
             return SimpleHTTPRequestHandler.handle_one_request(self, *args,
-                                                                **kwargs)
+                                                               **kwargs)
         except:
             pass
 
@@ -48,7 +48,6 @@ class VideoHandler(SimpleHTTPRequestHandler):
                  "streaming": manager.streaming}
         data = dumps(dict_)
         self.wfile.write(data)
-
 
     def do_GET(self):
 
@@ -170,7 +169,6 @@ class VideoHandler(SimpleHTTPRequestHandler):
         except Exception:
             pass
         self.rfile.close()
-
 
 
 class InvalidRangeHeader(Exception):

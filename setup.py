@@ -36,7 +36,7 @@ setup(
                       ],
     entry_points={
         'console_scripts': ['touchandgo = touchandgo.__init__:main',
-                            'tsproxy = touchandgo.tsproxy:serve']
+                            'tsproxy = touchandgo.tsproxy.__init__:serve']
     },
     package_data={
         'touchandgo': ['templates/*'],

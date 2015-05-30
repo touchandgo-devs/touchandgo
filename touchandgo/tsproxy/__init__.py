@@ -14,10 +14,11 @@ from jinja2 import FileSystemLoader
 
 from touchandgo.helpers import get_interface, LOCKFILE, get_free_port, \
     is_process_running
-from touchandgo.decorators import with_config_dir
 from touchandgo.history import History
-from touchandgo.lock import Lock
+from touchandgo.decorators import with_config_dir
 from touchandgo.logger import log_set_up
+from touchandgo.settings import DEBUG
+from touchandgo.tsproxy.lock import Lock
 
 
 log = logging.getLogger('touchandgo.proxy')
@@ -25,7 +26,7 @@ log = logging.getLogger('touchandgo.proxy')
 
 @with_config_dir
 def serve(py_exec=None):
-    log_set_up(True)
+    log_set_up(DEBUG)
     parser = argparse.ArgumentParser()
     parser.add_argument("--python", default="python2")
     args = parser.parse_args()

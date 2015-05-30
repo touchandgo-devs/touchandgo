@@ -10,17 +10,12 @@ from os import mkdir
 from os.path import getmtime, exists, dirname, join
 from shutil import copyfile
 
+from altasetting import Settings
 from netifaces import interfaces, ifaddresses
 from ojota import set_data_source
-from qtfaststart.processor import get_index
-from qtfaststart.exceptions import FastStartException
-
-from altasetting import Settings
-from touchandgo.settings import SKIP_MOOV
 
 
 LOCKFILE = "/tmp/touchandgo"
-
 log = logging.getLogger('touchandgo.helpers')
 
 
@@ -34,7 +29,6 @@ def get_settings():
 
     settings = Settings(settings_file, default)
     return settings
-
 
 
 def get_free_port():
@@ -130,27 +124,3 @@ def set_config_dir():
         mkdir(data_folder)
 
     set_data_source(data_folder)
-
-
-def have_moov(video_file):
-    if not SKIP_MOOV:
-        atoms = {}
-        log.info("Checking moov data of %s", video_file)
-        try:
-            atom_data = get_index(open(video_file, 'rb'))
-            for atom in atom_data:
-                atoms[atom.name] = atom.position
-            log.debug("moov:%(moov)s mdat:%(mdat)s ftyp:%(ftyp)s free:%(free)s",
-                    atoms)
-
-            if atoms['moov'] > atoms['mdat']:
-                log.info("moov atom after mdat")
-                return True, "after_mdat"
-            else:
-                log.info("moov atom before mdat")
-                return True
-        except FastStartException as e:
-            log.error("Couldn't get Atoms data: %s", str(e))
-            return False
-    else:
-        return True

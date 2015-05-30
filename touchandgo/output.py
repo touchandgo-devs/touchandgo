@@ -45,6 +45,7 @@ class OMXOutput(Output):
         subs = "--subtitle %s" % self.sub_file
         return subs
 
+
 class CastOutput(Output):
     def run(self):
         import pychromecast
