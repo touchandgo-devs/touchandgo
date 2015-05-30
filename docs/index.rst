@@ -41,6 +41,7 @@ Parameters
     --daemon              Daemonize the process
     --port PORT, -p PORT  The port where the stream will be served
     --verbose             Show _all_ the logs
+    --player PLAYER       Player to use. vlc|omxplayer|chromecast
     --search SEARCH       search lib to use (only option right now is 'kat' for
                           kickass torrents)
     --nocache             Search for the torrent again

@@ -176,8 +176,8 @@ def main():
             daemonize(args, callback)
         else:
             touchandgo.watch()
-    except ValueError, e:
-        print e
+    except ValueError as e:
+        print(e)
 
 if __name__ == '__main__':
     main()
