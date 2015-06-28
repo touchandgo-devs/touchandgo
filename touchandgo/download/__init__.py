@@ -103,7 +103,7 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print(term.clear())
-                print(self.stats(DEBUG))
+                print(self.screen_data(DEBUG))
                 elapsed_time = datetime.now() - self.start_time
                 if elapsed_time > timedelta(minutes=2):
                     print("Torrent metadata not available")
@@ -124,7 +124,7 @@ class DownloadManager(object):
                     self.stream()
 
                 print(term.clear())
-                print(self.stats(DEBUG))
+                print(self.screen_data(DEBUG))
                 sleep(1)
         except KeyboardInterrupt:
             if self.httpd is not None:
@@ -198,37 +198,34 @@ class DownloadManager(object):
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
         if numerales != "":
-            numerales = Fore.MAGENTA + "\nPieces download state:\n" + numerales
+            numerales = term.magenta("\nPieces download state:\n" + numerales)
         return "%s\n" % numerales
 
-    def stats(self, defrag=False):
+    def screen_data(self, defrag=False):
         status = self.status
         text = Fore.WHITE
+        text += term.bold('Touchandgo\n\n')
         text += STATES[status.state]
-        text += Fore.YELLOW
-        text += ' %.2f%% complete ' % (status.progress * 100)
-        text += Fore.GREEN
+        text += term.yellow(' %.2f%% complete ' % (status.progress * 100))
         rates = self.rates()
-        text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
-            (rates[0], rates[1], status.num_peers)
+        rate_text = '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
+                    (rates[0], rates[1], status.num_peers)
+        text += term.green(rate_text)
 
-        if defrag:
+        if True:#defrag:
             text += self.defrag()
             text += Fore.WHITE
             text += "\n\n"
 
         if self._video_file is not None:
-            text += Fore.WHITE
-            text += "Serving "
-            text += Fore.YELLOW
-            text += self.video_file[0]
-            text += Fore.WHITE
-            text += " on "
-            text += Fore.BLUE
-            text += "http://localhost:%s\n" % self.port
+            text += term.white("Serving ")
+            text += term.yellow(self.video_file[0])
+            text += term.white(" on ")
+            text += term.blue("http://localhost:%s\n") % self.port
 
-        text += Fore.WHITE
-        text += "Elapsed Time: %s\n" % self.elapsed_time()
+        text += term.white("Elapsed Time: ")
+        text += term.red(self.elapsed_time())
+        text += "\n"
         return text
 
     def elapsed_time(self):
