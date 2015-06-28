@@ -1,6 +1,7 @@
 from KickassAPI import Search
 import logging
 
+from blessings import Terminal
 from os import _exit
 from time import time
 from torrentmediasearcher import TorrentMediaSearcher
@@ -9,11 +10,11 @@ from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
 from touchandgo.helpers import get_settings
 from touchandgo.history import History
-
 from touchandgo.search.strike import StrikeAPI
 
 
 log = logging.getLogger('touchandgo.main')
+term = Terminal()
 
 
 class SearchAndStream(object):
@@ -38,6 +39,7 @@ class SearchAndStream(object):
 
     @with_config_dir
     def download(self, results):
+        print(term.bold('Downloading Magnet'))
         log.info("Processing magnet link")
         magnet = results['magnet']
         log.info("Magnet: %s", magnet)
@@ -52,6 +54,7 @@ class SearchAndStream(object):
         manager.start()
 
     def watch(self):
+        print(term.bold('Welcome to Touchandgo'))
         try:
             if self.name.startswith('magnet'):
                 results = {'magnet': self.name}
@@ -72,7 +75,8 @@ class SearchAndStream(object):
             _exit(0)
 
     def search_magnet(self):
-        log.info("Searching torrent")
+        print ("Searching magnet")
+        log.info("Searching magnet")
         if self.search_engine == "kat":
             self.kat_search()
         elif self.search_engine == "strike":
@@ -89,9 +93,9 @@ class SearchAndStream(object):
 
     def kat_search(self):
         search_string = self.get_search_string()
+        print("Searching '%s' on Kickass" % search_string)
         log.info("Searching %s on Kickass", search_string)
         results = Search(search_string).list()
-        print results
         results = {'magnet': results[0].magnet_link}
         self.download(results)
 

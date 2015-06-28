@@ -8,8 +8,9 @@ import logging
 from os import _exit
 from os.path import join, exists
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from blessings import Terminal
 from colorama import Fore
 from guessit import guess_video_info
 from libtorrent import add_magnet_uri, session, storage_mode_t
@@ -25,6 +26,7 @@ from touchandgo.stream_server import serve_file
 
 
 log = logging.getLogger('touchandgo.download')
+term = Terminal()
 
 
 class DownloadManager(object):
@@ -96,12 +98,18 @@ class DownloadManager(object):
             self.start_time = datetime.now()
             self.session.listen_on(6881, 6891)
             self.session.start_dht()
+            print term.height
             print("Downloading metadata")
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
-                print("\n" * 80)
+                print(term.clear())
                 print(self.stats(DEBUG))
-                sleep(.5)
+                elapsed_time = datetime.now() - self.start_time
+                if elapsed_time > timedelta(minutes=2):
+                    print("Torrent metadata not available")
+                    return
+                else:
+                    sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
 
@@ -115,7 +123,7 @@ class DownloadManager(object):
                 if not self.streaming and is_seed:
                     self.stream()
 
-                #print("\n" * 80)
+                print(term.clear())
                 print(self.stats(DEBUG))
                 sleep(1)
         except KeyboardInterrupt:
@@ -189,23 +197,38 @@ class DownloadManager(object):
                 numeral = Fore.BLUE + ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
+        if numerales != "":
+            numerales = Fore.MAGENTA + "\nPieces download state:\n" + numerales
         return "%s\n" % numerales
 
     def stats(self, defrag=False):
         status = self.status
         text = Fore.WHITE
-        if self._video_file is not None:
-            text += "Serving %s on http://localhost:%s\n" % (self.video_file[0],
-                                                             self.port)
-        if defrag:
-            text += self.defrag()
-        text += Fore.WHITE
-        text += '%s %.2f%% complete ' % (STATES[status.state],
-                                         status.progress * 100)
+        text += STATES[status.state]
+        text += Fore.YELLOW
+        text += ' %.2f%% complete ' % (status.progress * 100)
+        text += Fore.GREEN
         rates = self.rates()
         text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
             (rates[0], rates[1], status.num_peers)
-        text += "Elapsed Time %s" % self.elapsed_time()
+
+        if True:#defrag:
+            text += self.defrag()
+            text += Fore.WHITE
+            text += "\n\n"
+
+        if self._video_file is not None:
+            text += Fore.WHITE
+            text += "Serving "
+            text += Fore.YELLOW
+            text += self.video_file[0]
+            text += Fore.WHITE
+            text += " on "
+            text += Fore.BLUE
+            text += "http://localhost:%s\n" % self.port
+
+        text += Fore.WHITE
+        text += "Elapsed Time: %s\n" % self.elapsed_time()
         return text
 
     def elapsed_time(self):

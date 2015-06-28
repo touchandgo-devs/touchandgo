@@ -4,6 +4,7 @@ import logging
 import sys
 
 from babelfish import Language
+from blessings import Terminal
 from libtorrent import version as libtorrent_version
 
 from touchandgo.helpers import daemonize
@@ -65,7 +66,9 @@ def main():
                 touchandgo.watch()
             daemonize(args, callback)
         else:
-            touchandgo.watch()
+            term = Terminal()
+            with term.fullscreen():
+                touchandgo.watch()
     except ValueError as e:
         print(e)
 
