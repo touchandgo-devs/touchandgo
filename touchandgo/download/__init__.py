@@ -212,7 +212,7 @@ class DownloadManager(object):
         text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
             (rates[0], rates[1], status.num_peers)
 
-        if True:#defrag:
+        if defrag:
             text += self.defrag()
             text += Fore.WHITE
             text += "\n\n"
