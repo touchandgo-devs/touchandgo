@@ -96,7 +96,27 @@ class SearchAndStream(object):
         print("Searching '%s' on Kickass" % search_string)
         log.info("Searching %s on Kickass", search_string)
         results = Search(search_string).list()
-        results = {'magnet': results[0].magnet_link}
+        print(term.clear())
+        print(term.bold("Touchandgo\n"))
+        print(term.red("Kickass Torrents Results"))
+        for i, result in enumerate(results, 1):
+            option = term.red("%s) " % i)
+            option += result.name + "  "
+            option += term.yellow(result.size)
+            option += term.green(" S:" + result.seed)
+            option += term.red(" L:" + result.leech)
+            print(option)
+        input_text = "Select which torrent you want to download (1-%d): " % \
+            len(results)
+        user_inuput = raw_input(input_text)
+        try:
+            opt = int(user_inuput) - 1
+            if opt > len(results):
+                opt = 0
+        except ValueError:
+            opt = 0
+
+        results = {'magnet': results[opt].magnet_link}
         self.download(results)
 
     def strike_search(self):
