@@ -100,8 +100,8 @@ class SearchAndStream(object):
         print(term.bold("Touchandgo\n"))
         print(term.red("Kickass Torrents Results"))
         for i, result in enumerate(results, 1):
-            option = term.red("%s) " % i)
-            option += result.name + "  "
+            option = term.cyan("%s) " % i)
+            option += result.name + " "
             option += term.yellow(result.size)
             option += term.green(" S:" + result.seed)
             option += term.red(" L:" + result.leech)
@@ -111,7 +111,7 @@ class SearchAndStream(object):
         user_inuput = raw_input(input_text)
         try:
             opt = int(user_inuput) - 1
-            if opt > len(results):
+            if opt > len(results) or opt < 1:
                 opt = 0
         except ValueError:
             opt = 0
