@@ -98,7 +98,6 @@ class DownloadManager(object):
             self.start_time = datetime.now()
             self.session.listen_on(6881, 6891)
             self.session.start_dht()
-            print term.height
             print("Downloading metadata")
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
