@@ -1,5 +1,6 @@
 from lockfile import FileLock
 
+
 class Lock(FileLock):
     def __init__(self, file_, pid=None, name=None, season=None, episode=None,
                  port=None):

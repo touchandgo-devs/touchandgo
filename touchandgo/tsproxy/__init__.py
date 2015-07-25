@@ -18,7 +18,7 @@ from touchandgo.history import History
 from touchandgo.decorators import with_config_dir
 from touchandgo.logger import log_set_up
 from touchandgo.settings import DEBUG
-from touchandgo.tsproxy.lock import Lock
+from touchandgo.lock import Lock
 
 
 log = logging.getLogger('touchandgo.proxy')

@@ -5,7 +5,6 @@ import socket
 
 from daemon import DaemonContext
 from datetime import datetime
-from lock import Lock
 from os import mkdir
 from os.path import getmtime, exists, dirname, join
 from shutil import copyfile
@@ -13,6 +12,7 @@ from shutil import copyfile
 from altasetting import Settings
 from netifaces import interfaces, ifaddresses
 from ojota import set_data_source
+from touchandgo.lock import Lock
 
 
 LOCKFILE = "/tmp/touchandgo"
