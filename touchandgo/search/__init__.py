@@ -116,7 +116,8 @@ class SearchAndStream(object):
         except ValueError:
             opt = 0
 
-        results = {'magnet': results[opt].magnet_link}
+        extra_tracker = "&tr=http%3A%2F%2Ftracker.nwps.ws%3A6969%2Fannounce"
+        results = {'magnet': results[opt].magnet_link + extra_tracker}
         self.download(results)
 
     def strike_search(self):
