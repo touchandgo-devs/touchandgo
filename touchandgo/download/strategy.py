@@ -1,5 +1,7 @@
 import logging
-from touchandgo.helpers import have_moov, get_settings
+
+from touchandgo.download.moov import have_moov
+from touchandgo.helpers import get_settings
 
 
 log = logging.getLogger('touchandgo.strategy')

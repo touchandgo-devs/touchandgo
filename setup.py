@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name='Touchandgo',
-    version='0.10.0',
+    version='0.11.0',
     author='Felipe Lerena, Nicolás Demarchi',
     description='A python app and library to watch series magically',
     author_email='felipelerena@gmail.com - mail@gilgamezh.me',
@@ -33,10 +33,11 @@ setup(
                       'KickassAPI',
                       'pyQuery',
                       'altasetting',
+                      'blessings'
                       ],
     entry_points={
         'console_scripts': ['touchandgo = touchandgo.__init__:main',
-                            'tsproxy = touchandgo.server:serve']
+                            'tsproxy = touchandgo.tsproxy.__init__:serve']
     },
     package_data={
         'touchandgo': ['templates/*'],

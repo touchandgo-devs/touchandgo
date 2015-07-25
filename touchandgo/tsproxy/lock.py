@@ -24,9 +24,13 @@ class Lock(FileLock):
         file_.close()
 
     def _get_file_data(self):
-        file_ = open('%s.lock' % self.path, 'r')
-        data = file_.read()
-        parts = data.split(",")
+        try:
+            file_ = open('%s.lock' % self.path, 'r')
+            data = file_.read()
+            parts = data.split(",")
+        except IOError:
+            parts = []
+
         return parts
 
     def is_same_file(self, name, season, episode):

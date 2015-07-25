@@ -12,18 +12,21 @@ from time import sleep
 from flask import Flask, redirect, render_template, Response, request
 from jinja2 import FileSystemLoader
 
-from touchandgo.helpers import get_interface, LOCKFILE, set_config_dir, \
-    get_free_port, is_process_running
+from touchandgo.helpers import get_interface, LOCKFILE, get_free_port, \
+    is_process_running
 from touchandgo.history import History
-from touchandgo.lock import Lock
+from touchandgo.decorators import with_config_dir
 from touchandgo.logger import log_set_up
+from touchandgo.settings import DEBUG
+from touchandgo.tsproxy.lock import Lock
 
 
 log = logging.getLogger('touchandgo.proxy')
 
 
+@with_config_dir
 def serve(py_exec=None):
-    log_set_up(True)
+    log_set_up(DEBUG)
     parser = argparse.ArgumentParser()
     parser.add_argument("--python", default="python2")
     args = parser.parse_args()
@@ -117,7 +120,6 @@ def serve(py_exec=None):
 
         return render_template("main.html", items=series, magnet=request.args.get('m', ''))
 
-    set_config_dir()
     app.debug = True
     kill_()
     app.run(host="0.0.0.0")

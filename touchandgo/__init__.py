@@ -4,113 +4,15 @@ import logging
 import sys
 
 from babelfish import Language
-from KickassAPI import Search
+from blessings import Terminal
 from libtorrent import version as libtorrent_version
-from os import _exit
-from time import time
-from torrentmediasearcher import TorrentMediaSearcher
 
-from touchandgo.helpers import daemonize, set_config_dir, get_settings
-from touchandgo.history import History
-from touchandgo.download import DownloadManager
+from touchandgo.helpers import daemonize
 from touchandgo.logger import log_set_up
+from touchandgo.search import SearchAndStream
 
 
 log = logging.getLogger('touchandgo.main')
-
-
-class SearchAndStream(object):
-    def __init__(self, name, season=None, episode=None, sub_lang=None,
-                 serve=False, quality=None, port=None, player=None,
-                 search=None, use_cache=True):
-        self.name = name
-        self.season = season
-        self.episode = episode
-        self.sub_lang = sub_lang
-        self.serve = serve
-        self.quality = quality
-        self.port = port
-        self.player = player
-        if search is None:
-            settings = get_settings()
-            search = settings.default_search_engine
-        self.search_engine = search
-        self.use_cache = use_cache
-
-        set_config_dir()
-
-    def download(self, results):
-        log.info("Processing magnet link")
-        magnet = results['magnet']
-        log.info("Magnet: %s", magnet)
-
-        set_config_dir()
-
-        history = History(date=int(time()), name=self.name, season=self.season,
-                          episode=self.episode, magnet=magnet)
-        history.save()
-        history.update()
-
-        manager = DownloadManager(magnet, port=self.port, serve=self.serve,
-                                  sub_lang=self.sub_lang, player=self.player)
-        manager.start()
-
-    def watch(self):
-        try:
-            if self.name.startswith('magnet'):
-                results = {'magnet': self.name}
-                self.download(results)
-            else:
-                history = None
-                if self.use_cache:
-                    history = History.one(name=self.name, season=self.season,
-                                        episode=self.episode)
-                if history is None or not hasattr(history, "magnet"):
-                    self.search_magnet()
-                else:
-                    results = {'magnet': history.magnet}
-                    self.download(results)
-
-        except KeyboardInterrupt:
-            log.info("Thanks for using Touchandgo")
-            _exit(0)
-
-    def search_magnet(self):
-        log.info("Searching torrent")
-        if self.search_engine == "kat":
-            self.kat_search()
-        else:
-            self.tms_search()
-
-    def get_search_string(self):
-        search_string = self.name
-        if self.season is not None and self.episode is not None:
-            search_string += " s%se%s" % (str(self.season).zfill(2),
-                                          str(self.episode).zfill(2))
-        return search_string
-
-    def kat_search(self):
-        search_string = self.get_search_string()
-        log.info("Searching %s", search_string)
-        results = Search(search_string).list()
-        results = {'magnet': results[0].magnet_link}
-        self.download(results)
-
-    def tms_search(self):
-        search = TorrentMediaSearcher
-        if self.season is None and self.episode is None:
-            search.request_movie_magnet('torrentproject', self.name,
-                                        callback=self.download,
-                                        quality=self.quality)
-        else:
-            if self.quality is None:
-                quality = 'normal'
-            else:
-                quality = self.quality
-            search.request_tv_magnet(provider='eztv', show=self.name,
-                                     season=int(self.season),
-                                     episode=int(self.episode),
-                                     quality=quality, callback=self.download)
 
 
 def main():
@@ -164,9 +66,11 @@ def main():
                 touchandgo.watch()
             daemonize(args, callback)
         else:
-            touchandgo.watch()
-    except ValueError, e:
-        print e
+            term = Terminal()
+            with term.fullscreen():
+                touchandgo.watch()
+    except ValueError as e:
+        print(e)
 
 if __name__ == '__main__':
     main()

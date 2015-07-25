@@ -8,23 +8,25 @@ import logging
 from os import _exit
 from os.path import join, exists
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from blessings import Terminal
 from colorama import Fore
 from guessit import guess_video_info
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
+from touchandgo.download.strategy import DefaultStrategy
+from touchandgo.download.subtitles import SubtitleDownloader
 from touchandgo.helpers import is_port_free, get_free_port, get_settings
 from touchandgo.logger import log_set_up
 from touchandgo.output import VLCOutput, OMXOutput, CastOutput
 from touchandgo.settings import DEBUG, WAIT_FOR_IT, DEFAULT_PORT
-from touchandgo.strategy import DefaultStrategy
 from touchandgo.stream_server import serve_file
-from touchandgo.subtitles import SubtitleDownloader
 
 
 log = logging.getLogger('touchandgo.download')
+term = Terminal()
 
 
 class DownloadManager(object):
@@ -99,9 +101,14 @@ class DownloadManager(object):
             print("Downloading metadata")
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
-                print("\n" * 80)
-                print(self.stats(DEBUG))
-                sleep(.5)
+                print(term.clear())
+                print(self.screen_data(DEBUG))
+                elapsed_time = datetime.now() - self.start_time
+                if elapsed_time > timedelta(minutes=2):
+                    print("Torrent metadata not available")
+                    return
+                else:
+                    sleep(.5)
             log.info("Starting download")
             self.strategy.initial()
 
@@ -115,8 +122,8 @@ class DownloadManager(object):
                 if not self.streaming and is_seed:
                     self.stream()
 
-                #print("\n" * 80)
-                print(self.stats(DEBUG))
+                print(term.clear())
+                print(self.screen_data(DEBUG))
                 sleep(1)
         except KeyboardInterrupt:
             if self.httpd is not None:
@@ -189,23 +196,35 @@ class DownloadManager(object):
                 numeral = Fore.BLUE + ">"
             numeral += str(self.handle.piece_priority(i))
             numerales += numeral
+        if numerales != "":
+            numerales = term.magenta("\nPieces download state:\n" + numerales)
         return "%s\n" % numerales
 
-    def stats(self, defrag=False):
+    def screen_data(self, defrag=False):
         status = self.status
         text = Fore.WHITE
-        if self._video_file is not None:
-            text += "Serving %s on http://localhost:%s\n" % (self.video_file[0],
-                                                             self.port)
-        if defrag:
-            text += self.defrag()
-        text += Fore.WHITE
-        text += '%s %.2f%% complete ' % (STATES[status.state],
-                                         status.progress * 100)
+        text += term.bold('Touchandgo\n\n')
+        text += STATES[status.state]
+        text += term.yellow(' %.2f%% complete ' % (status.progress * 100))
         rates = self.rates()
-        text += '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
-            (rates[0], rates[1], status.num_peers)
-        text += "Elapsed Time %s" % self.elapsed_time()
+        rate_text = '(down: %.1f kB/s up: %.1f kB/s peers: %d)\n' % \
+                    (rates[0], rates[1], status.num_peers)
+        text += term.green(rate_text)
+
+        if True:#defrag:
+            text += self.defrag()
+            text += Fore.WHITE
+            text += "\n\n"
+
+        if self._video_file is not None:
+            text += term.white("Serving ")
+            text += term.yellow(self.video_file[0])
+            text += term.white(" on ")
+            text += term.blue("http://localhost:%s\n") % self.port
+
+        text += term.white("Elapsed Time: ")
+        text += term.red(self.elapsed_time())
+        text += "\n"
         return text
 
     def elapsed_time(self):
