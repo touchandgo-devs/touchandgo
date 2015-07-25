@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name='Touchandgo',
-    version='0.11.0',
+    version='0.12.0',
     author='Felipe Lerena, Nicolás Demarchi',
     description='A python app and library to watch series magically',
     author_email='felipelerena@gmail.com - mail@gilgamezh.me',
