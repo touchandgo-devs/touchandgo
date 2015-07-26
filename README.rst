@@ -15,6 +15,10 @@ How to install
   pip install touchandgo
   (pip needs python-dev package to compile some libraries. If you don't 
   have installed run "sudo apt-get install python-dev")
+  if you have problems compiling lxml even with all the packages installed you
+  shoud try to install it like this: 
+  
+  CFLAGS="-O0" pip install touchandgo
 
 
 How to use
