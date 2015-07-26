@@ -10,7 +10,7 @@ How to install
 
 ::
 
-  sudo apt-get install python-libtorrent (or the name of the package on your
+  sudo apt-get install python-libtorrent libxml2-dev libxslt1-dev python-lxml (or the name of the package on your
   linux distro)
   pip install touchandgo
   (pip needs python-dev package to compile some libraries. If you don't 
