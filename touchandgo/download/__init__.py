@@ -57,6 +57,7 @@ class DownloadManager(object):
         # we are waiting untill all the first peices are downloaded
         # the biggest file which is supposed to be a video file
         self._video_file = None
+        self.subtitle_file = None
         self.callback = serve_file
         self._served_blocks = None
         self.streaming = False
@@ -135,6 +136,10 @@ class DownloadManager(object):
         if self._video_file is None:
             self._video_file = self.get_biggest_file()
             log.info("Video File: %s", self._video_file)
+
+            if self.subtitle is not None and self.subtitle_file is None:
+                self.subtitle_file = self.subtitle.download(self._video_file)
+                log.info("Subtitle File: %s", self.subtitle_file)
         return self._video_file
 
     def get_biggest_file(self):
@@ -154,17 +159,13 @@ class DownloadManager(object):
     def output(self):
         self.wait_for_file()
         stream_url = "http://localhost:%s" % self.port
-        if self.subtitle is not None:
-            subtitle = self.subtitle.download(self.video_file)
-        else:
-            subtitle = None
 
         players = {"vlc": VLCOutput,
                    "omxplayer": OMXOutput,
                    "chromecast": CastOutput
                    }
         output_class = players.get(self.player, VLCOutput)
-        output = output_class(stream_url, subtitle, self)
+        output = output_class(stream_url, self.subtitle_file, self)
         try:
             output.run()
         except KeyboardInterrupt:
