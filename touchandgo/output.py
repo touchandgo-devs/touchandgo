@@ -47,10 +47,43 @@ class OMXOutput(Output):
 
 
 class CastOutput(Output):
-    def run(self):
+    def select_chromecast(self):
         import pychromecast
 
-        self.chromecast = pychromecast.get_chromecast()
+        self.chromecast = None
+        chromecasts = pychromecast.get_chromecasts_as_dict().keys()
+
+        if not chromecasts:
+            return
+
+        if len(chromecasts) > 1:
+            from blessings import Terminal
+            term = Terminal()
+
+            print(term.clear())
+            print(term.bold("Touchandgo\n"))
+            print(term.red("Chromecasts Availables"))
+            for i, cc_name in enumerate(chromecasts, 1):
+                option = term.cyan("%s) " % i)
+                option += cc_name
+                print(option)
+
+            input_text = "Select which chromecast you want to play (1-%d): " % \
+                len(chromecasts)
+            user_input = raw_input(input_text)
+
+        try:
+            opt = int(user_input) - 1
+            if opt > len(chromecasts) or opt < 1:
+                opt = 0
+        except ValueError:
+            opt = 0
+
+        self.chromecast = pychromecast.get_chromecast(
+            friendly_name=chromecasts[opt])
+
+    def run(self):
+        self.select_chromecast()
         interface = get_interface()
         guess = self.parent.guess(self.parent.get_video_path())
         self.chromecast.play_media("http://%s:%s" % (interface, self.parent.port),
