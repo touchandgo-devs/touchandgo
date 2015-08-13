@@ -57,7 +57,6 @@ class DownloadManager(object):
         # we are waiting untill all the first peices are downloaded
         # the biggest file which is supposed to be a video file
         self._video_file = None
-        self.subtitle_file = None
         self.callback = serve_file
         self._served_blocks = None
         self.streaming = False
@@ -136,10 +135,6 @@ class DownloadManager(object):
         if self._video_file is None:
             self._video_file = self.get_biggest_file()
             log.info("Video File: %s", self._video_file)
-
-            if self.subtitle is not None and self.subtitle_file is None:
-                self.subtitle_file = self.subtitle.download(self._video_file)
-                log.info("Subtitle File: %s", self.subtitle_file)
         return self._video_file
 
     def get_biggest_file(self):
@@ -156,16 +151,21 @@ class DownloadManager(object):
         while not exists(join(self.settings.save_path, self.video_file[0])):
             sleep(WAIT_FOR_IT)
 
-    def output(self):
+    def output(self, chromecast=None):
+        self.chromecast = chromecast
         self.wait_for_file()
         stream_url = "http://localhost:%s" % self.port
+        if self.subtitle is not None:
+            subtitle = self.subtitle.download(self.video_file)
+        else:
+            subtitle = None
 
         players = {"vlc": VLCOutput,
                    "omxplayer": OMXOutput,
                    "chromecast": CastOutput
                    }
         output_class = players.get(self.player, VLCOutput)
-        output = output_class(stream_url, self.subtitle_file, self)
+        output = output_class(stream_url, subtitle, self)
         try:
             output.run()
         except KeyboardInterrupt:
@@ -179,7 +179,12 @@ class DownloadManager(object):
             self._served_blocks = [False for i in range(len(pieces))]
             self.stream_th = thread.start_new_thread(self.callback, (self, ))
             if not self.serve:
-                self.player_th = thread.start_new_thread(self.output, ())
+                params = ()
+                if self.player == "chromecast":
+                    chromecast = CastOutput.select_chromecast()
+                    params = (chromecast, )
+
+                self.player_th = thread.start_new_thread(self.output, params)
 
     def block_served(self, block):
         self._served_blocks[block] = True

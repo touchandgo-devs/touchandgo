@@ -1,3 +1,6 @@
+import pychromecast
+
+from blessings import Terminal
 from os import system
 from time import sleep
 
@@ -47,17 +50,14 @@ class OMXOutput(Output):
 
 
 class CastOutput(Output):
-    def select_chromecast(self):
-        import pychromecast
-
-        self.chromecast = None
+    @classmethod
+    def select_chromecast(cls):
         chromecasts = pychromecast.get_chromecasts_as_dict().keys()
 
         if not chromecasts:
             return
 
         if len(chromecasts) > 1:
-            from blessings import Terminal
             term = Terminal()
 
             print(term.clear())
@@ -68,7 +68,7 @@ class CastOutput(Output):
                 option += cc_name
                 print(option)
 
-            input_text = "Select which chromecast you want to play (1-%d): " % \
+            input_text = "Select which chromecast you want to cast (1-%d): " % \
                 len(chromecasts)
             user_input = raw_input(input_text)
 
@@ -79,15 +79,15 @@ class CastOutput(Output):
         except ValueError:
             opt = 0
 
-        self.chromecast = pychromecast.get_chromecast(
-            friendly_name=chromecasts[opt])
+        return chromecasts[opt]
 
     def run(self):
-        self.select_chromecast()
+        chromecast = self.parent.chromecast
+        device = pychromecast.get_chromecast(friendly_name=chromecast)
         interface = get_interface()
         guess = self.parent.guess(self.parent.get_video_path())
-        self.chromecast.play_media("http://%s:%s" % (interface, self.parent.port),
-                                   guess['mimetype'])
+        device.play_media("http://%s:%s" % (interface, self.parent.port),
+                          guess['mimetype'])
         while True:
             sleep(1)
 
