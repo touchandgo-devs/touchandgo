@@ -52,6 +52,7 @@ class OMXOutput(Output):
 class CastOutput(Output):
     @classmethod
     def select_chromecast(cls):
+        name = None
         chromecasts = pychromecast.get_chromecasts_as_dict().keys()
 
         if not chromecasts:
@@ -72,14 +73,18 @@ class CastOutput(Output):
                 len(chromecasts)
             user_input = raw_input(input_text)
 
-        try:
-            opt = int(user_input) - 1
-            if opt > len(chromecasts) or opt < 1:
+            try:
+                opt = int(user_input) - 1
+                if opt > len(chromecasts) or opt < 1:
+                    opt = 0
+            except ValueError:
                 opt = 0
-        except ValueError:
-            opt = 0
 
-        return chromecasts[opt]
+            name = chromecasts[opt]
+        elif len(chromecasts) == 1:
+            name = chromecasts[0]
+
+        return name
 
     def run(self):
         chromecast = self.parent.chromecast
