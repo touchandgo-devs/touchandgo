@@ -39,7 +39,7 @@ def main():
     parser.add_argument("--player", default='vlc',
                         help="Player to use. vlc|omxplayer|chromecast")
     parser.add_argument("--search", default=None,
-                        help="search lib to use (only option right now is 'kat' for kickass torrents)")
+                        help="search lib to use (options are 'kat', 'tms', 'strike')")
     parser.add_argument("--nocache", action="store_false", default=True,
                         help="Search for the torrent again"),
 
