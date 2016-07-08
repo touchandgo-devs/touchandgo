@@ -31,7 +31,7 @@ class DefaultStrategy(object):
         self.chunks_strat = len(status.pieces) / 30
 
     def block_requested(self, block_requested):
-        #log.debug("block requested %s" % block_requested)
+        # log.debug("block requested %s" % block_requested)
         if not self.holding_stream:
             self.move_strategy(block_requested)
 

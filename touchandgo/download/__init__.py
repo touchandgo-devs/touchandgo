@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 from blessings import Terminal
 from colorama import Fore
-from guessit import guess_video_info
+from guessit import guessit
 from libtorrent import add_magnet_uri, session, storage_mode_t
 
 from touchandgo.constants import STATES
@@ -217,7 +217,7 @@ class DownloadManager(object):
                     (rates[0], rates[1], status.num_peers)
         text += term.green(rate_text)
 
-        if True:#defrag:
+        if defrag:
             text += self.defrag()
             text += Fore.WHITE
             text += "\n\n"
@@ -246,7 +246,7 @@ class DownloadManager(object):
 
     def guess(self, path):
         if self._guess is None:
-            self._guess = guess_video_info(path, info=['filename'])
+            self._guess = guessit(path)
         return self._guess
 
 

@@ -18,7 +18,7 @@ def have_moov(video_file):
             for atom in atom_data:
                 atoms[atom.name] = atom.position
             log.debug("moov:%(moov)s mdat:%(mdat)s ftyp:%(ftyp)s free:%(free)s",
-                    atoms)
+                      atoms)
 
             if atoms['moov'] > atoms['mdat']:
                 log.info("moov atom after mdat")

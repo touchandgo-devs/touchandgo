@@ -1,3 +1,5 @@
+import logging
+
 import pychromecast
 
 from blessings import Terminal
@@ -5,6 +7,9 @@ from os import system
 from time import sleep
 
 from touchandgo.helpers import get_interface
+
+
+log = logging.getLogger('touchandgo.output')
 
 
 class Output(object):
@@ -21,6 +26,7 @@ class Output(object):
             subs = ""
 
         command = "%s %s" % (player_command, subs)
+        log.debug("VLC command: %s" % command)
         system(command)
 
     def _player(self):
@@ -32,10 +38,11 @@ class Output(object):
 
 class VLCOutput(Output):
     def _player(self):
-        return "vlc %s -q" % self.stream_url
+        command = "vlc %s -q" % self.stream_url
+        return command
 
     def _subs(self):
-        subs = "--sub-file %s" % self.sub_file
+        subs = "--sub-file \"%s\"" % self.sub_file
         return subs
 
 
