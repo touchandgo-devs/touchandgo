@@ -35,7 +35,7 @@ class SubtitleDownloader(object):
         if subtitles is not None and len(subtitles):
             subs = subtitles.values()[0]
             if len(subs):
-                save_subtitles(video, subs, single=True)
+                save_subtitles(video, subs, single=True, encoding="utf-8")
                 subtitle = get_subtitle_path(video.name, None)
 
         log.info("video_file: %s, filepath: %s, guess: %s, video: %s, "
