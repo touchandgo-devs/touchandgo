@@ -10,6 +10,7 @@ from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
 from touchandgo.helpers import get_settings
 from touchandgo.history import History
+from touchandgo.search.helpers import kat_html2magnet
 from touchandgo.search.strike import StrikeAPI
 
 
@@ -115,9 +116,11 @@ class SearchAndStream(object):
                 opt = 0
         except ValueError:
             opt = 0
-
+        magnet = results[opt].magnet_link
+        if magnet is None:
+            magnet = kat_html2magnet(results[opt].torrent_link)
         extra_tracker = "&tr=http%3A%2F%2Ftracker.nwps.ws%3A6969%2Fannounce"
-        results = {'magnet': results[opt].magnet_link + extra_tracker}
+        results = {'magnet': magnet + extra_tracker}
         self.download(results)
 
     def strike_search(self):

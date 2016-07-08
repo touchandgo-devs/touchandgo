@@ -28,11 +28,3 @@ class StrikeAPI():
         response = requests.get(info_url, params=payload, headers=self.headers)
         magnet = response.json()[1][0]['magnet_uri']
         return magnet
-
-
-
-
-
-
-
-

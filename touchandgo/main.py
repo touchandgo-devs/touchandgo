@@ -67,8 +67,8 @@ def main():
             daemonize(args, callback)
         else:
             term = Terminal()
-            with term.fullscreen():
-                touchandgo.watch()
+            #with term.fullscreen():
+            touchandgo.watch()
     except ValueError as e:
         print(e)
 
