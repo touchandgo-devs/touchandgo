@@ -102,7 +102,7 @@ class DownloadManager(object):
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
                 print(term.clear())
-                print(self.screen_data(DEBUG))
+                print(self.screen_data(DEBUG or self.settings.defrag))
                 elapsed_time = datetime.now() - self.start_time
                 if elapsed_time > timedelta(minutes=2):
                     print("Torrent metadata not available")
@@ -123,7 +123,7 @@ class DownloadManager(object):
                     self.stream()
 
                 print(term.clear())
-                print(self.screen_data(DEBUG))
+                print(self.screen_data(DEBUG or self.settings.defrag))
                 sleep(1)
         except KeyboardInterrupt:
             if self.httpd is not None:

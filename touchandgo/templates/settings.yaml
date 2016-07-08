@@ -10,3 +10,4 @@ strategy:
     last_piece_st: 2
     chunks_strat: 10
 default_search_engine: kat
+defrag: false
