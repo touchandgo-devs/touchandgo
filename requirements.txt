@@ -1,4 +1,5 @@
 altasetting==0.1.1
+BeautifulSoup==3.2.1
 blessings==1.6
 colorama==0.3.2
 Flask==0.10.1

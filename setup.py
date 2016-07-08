@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name='Touchandgo',
-    version='0.13.1',
+    version='0.13.2',
     author='Felipe Lerena, Nicolás Demarchi',
     description='A python app and library to watch series magically',
     author_email='felipelerena@gmail.com - mail@gilgamezh.me',
@@ -21,6 +21,7 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         'altasetting==0.1.1',
+        'BeautifulSoup==3.2.1',
         'blessings==1.6',
         'colorama==0.3.2',
         'flask==0.10.1',
