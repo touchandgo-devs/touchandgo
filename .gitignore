@@ -1,9 +1,10 @@
 *.pyc
-*.swp
-*.swo
 *.swn
+*.swo
+*.swp
 .ropeproject
-dist
-build
-_build
+.vagrant
 Touchandgo.egg-info
+_build
+build
+dist
