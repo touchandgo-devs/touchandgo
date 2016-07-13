@@ -100,21 +100,24 @@ class SearchAndStream(object):
         print(term.clear())
         print(term.bold("Touchandgo\n"))
         print(term.red("Kickass Torrents Results"))
-        for i, result in enumerate(results, 1):
-            option = term.cyan("%s) " % i)
-            option += result.name + " "
-            option += term.yellow(result.size)
-            option += term.green(" S:" + result.seed)
-            option += term.red(" L:" + result.leech)
-            print(option)
-        input_text = "Select which torrent you want to download (1-%d): " % \
-            len(results)
-        user_inuput = raw_input(input_text)
-        try:
-            opt = int(user_inuput) - 1
-            if opt > len(results) or opt < 1:
+        if not self.serve:
+            for i, result in enumerate(results, 1):
+                option = term.cyan("%s) " % i)
+                option += result.name + " "
+                option += term.yellow(result.size)
+                option += term.green(" S:" + result.seed)
+                option += term.red(" L:" + result.leech)
+                print(option)
+            input_text = "Select which torrent you want to download (1-%d): " % \
+                len(results)
+            user_inuput = raw_input(input_text)
+            try:
+                opt = int(user_inuput) - 1
+                if opt > len(results) or opt < 1:
+                    opt = 0
+            except ValueError:
                 opt = 0
-        except ValueError:
+        else:
             opt = 0
         magnet = results[opt].magnet_link
         if magnet is None:

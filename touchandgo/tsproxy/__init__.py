@@ -1,24 +1,24 @@
 #! /usr/bin/env python2
 import argparse
 import logging
-import requests
 import signal
 
 from os import kill
 from os.path import abspath, dirname, join
-
 from subprocess import PIPE, STDOUT, Popen
 from time import sleep
-from flask import Flask, redirect, render_template, Response, request
+
+import requests
+from flask import Flask, Response, redirect, render_template, request
 from jinja2 import FileSystemLoader
 
-from touchandgo.helpers import get_interface, LOCKFILE, get_free_port, \
-    is_process_running
-from touchandgo.history import History
 from touchandgo.decorators import with_config_dir
+from touchandgo.helpers import (LOCK_FILE, get_free_port, get_interface,
+                                is_process_running)
+from touchandgo.history import History
+from touchandgo.lock import Lock
 from touchandgo.logger import log_set_up
 from touchandgo.settings import DEBUG
-from touchandgo.lock import Lock
 
 
 log = logging.getLogger('touchandgo.proxy')
@@ -41,11 +41,11 @@ def serve(py_exec=None):
         interface = get_interface()
         path = abspath(__file__)
         dir_path = dirname(path)
-        exec_ = join(dir_path, "__init__.py")
+        exec_ = join(dir_path, "..",  "main.py")
         command = '%s %s \"%s\" ' % (py_exec, exec_, name)
         if season is not None:
             command += "%s %s " % (season, episode)
-        lock = Lock(LOCKFILE)
+        lock = Lock(LOCK_FILE)
         if lock.is_same_file(name, season, episode) and \
                 is_process_running(lock.get_pid()):
             data = lock._get_file_data()
@@ -53,7 +53,7 @@ def serve(py_exec=None):
         else:
             port = get_free_port()
             command += "--daemon --port %s " % port
-            log.debug(command)
+            log.info(command)
             process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
             sleep(1)
 
@@ -98,7 +98,7 @@ def serve(py_exec=None):
 
     @app.route("/kill")
     def kill_():
-        lock = Lock(LOCKFILE)
+        lock = Lock(LOCK_FILE)
         try:
             kill(lock.get_pid(), signal.SIGQUIT)
         except Exception, e:
@@ -118,7 +118,8 @@ def serve(py_exec=None):
                 series.append(item)
                 keys.append(key)
 
-        return render_template("main.html", items=series, magnet=request.args.get('m', ''))
+        return render_template("main.html", items=series,
+                               magnet=request.args.get('m', ''))
 
     app.debug = True
     kill_()

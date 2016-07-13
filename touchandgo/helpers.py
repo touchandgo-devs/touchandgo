@@ -1,27 +1,29 @@
-import os
 import logging
+import os
 import signal
 import socket
-
-from daemon import DaemonContext
 from datetime import datetime
 from os import mkdir
-from os.path import getmtime, exists, dirname, join
+from os.path import dirname, exists, getmtime, join
 from shutil import copyfile
 
+from daemon import DaemonContext
+
 from altasetting import Settings
-from netifaces import interfaces, ifaddresses
+from netifaces import ifaddresses, interfaces
 from ojota import set_data_source
 from touchandgo.lock import Lock
+from touchandgo.settings import (BIND_ADDRESS, LOCK_FILE, SETTINGS_FILE,
+                                 SETTINGS_FOLDER)
 
 
-LOCKFILE = "/tmp/touchandgo"
 log = logging.getLogger('touchandgo.helpers')
 
 
 def get_settings():
-    settings_file = "%s/.touchandgo/settings.yaml" % os.getenv("HOME")
-    default = join(dirname(__file__), "templates", "settings.yaml")
+    home = os.getenv("HOME")
+    settings_file = join(home, SETTINGS_FOLDER, SETTINGS_FILE)
+    default = join(dirname(__file__), "templates", SETTINGS_FILE)
 
     set_config_dir()
     if not exists(settings_file):
@@ -33,7 +35,7 @@ def get_settings():
 
 def get_free_port():
     socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket_.bind(('localhost', 0))
+    socket_.bind((BIND_ADDRESS, 0))
     addr, port = socket_.getsockname()
     socket_.close()
     return port
@@ -43,7 +45,7 @@ def is_port_free(port):
     free = True
     socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        socket_.bind(('localhost', port))
+        socket_.bind((BIND_ADDRESS, port))
     except socket.error:
         free = False
     socket_.close()
@@ -76,42 +78,48 @@ def daemonize(args, callback):
         from touchandgo.logger import log_set_up
         log_set_up(True)
         log = logging.getLogger('touchandgo.daemon')
-        log.info("running daemon")
-        create_process = False
-        lock = Lock(LOCKFILE, os.getpid(), args.name, args.sea_ep[0],
-                    args.sea_ep[1], args.port)
-        if lock.is_locked():
-            log.debug("lock active")
-            lock_pid = lock.get_pid()
-            if not lock.is_same_file(args.name, args.sea_ep[0],
-                                     args.sea_ep[1]) \
-                    or not is_process_running(lock_pid):
-                try:
-                    log.debug("killing process %s" % lock_pid)
-                    os.kill(lock_pid, signal.SIGQUIT)
-                except OSError:
-                    pass
-                except TypeError:
-                    pass
-                lock.break_lock()
+        try:
+            log.info("running daemon")
+            create_process = False
+            pid = os.getpid()
+            log.debug("%s, %s, %s", LOCK_FILE, pid, args)
+            lock = Lock(LOCK_FILE, pid, args.name, args.season_number,
+                        args.episode_number, args.port)
+            if lock.is_locked():
+                log.debug("lock active")
+                lock_pid = lock.get_pid()
+                is_same = lock.is_same_file(args.name, args.season_number,
+                                            args.episode_number)
+                if (not is_same or not is_process_running(lock_pid)):
+                    try:
+                        log.debug("killing process %s" % lock_pid)
+                        os.kill(lock_pid, signal.SIGQUIT)
+                    except OSError:
+                        pass
+                    except TypeError:
+                        pass
+                    lock.break_lock()
+                    create_process = True
+            else:
+                log.debug("Will create process")
                 create_process = True
-        else:
-            create_process = True
 
-        if create_process:
-            log.debug("creating proccess")
-            lock.acquire()
-            callback()
-            lock.release()
-        else:
-            log.debug("same daemon process")
+            if create_process:
+                log.debug("creating proccess")
+                lock.acquire()
+                callback()
+                lock.release()
+            else:
+                log.debug("same daemon process")
+        except Exception as e:
+            log.error(e)
 
 
 def get_lock_diff():
     timediff = 0
     try:
         now = datetime.now()
-        timediff = now - datetime.fromtimestamp(getmtime(LOCKFILE + ".lock"))
+        timediff = now - datetime.fromtimestamp(getmtime(LOCK_FILE))
         timediff = timediff.total_seconds()
     except OSError:
         pass
@@ -119,7 +127,8 @@ def get_lock_diff():
 
 
 def set_config_dir():
-    data_folder = "%s/.touchandgo" % os.getenv("HOME")
+    home = os.getenv("HOME")
+    data_folder = join(home, SETTINGS_FOLDER)
     if not exists(data_folder):
         mkdir(data_folder)
 
