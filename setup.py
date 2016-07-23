@@ -33,7 +33,7 @@ setup(
         'PyChromecast==0.7.3',
         'pyQuery==1.2.13',
         'python-daemon==1.6.1',
-        'pyyaml==15.8.2',
+        'pyaml==15.8.2',
         'qtfaststart==1.8',
         'requests==2.3.0',
         'simplejson==3.6.2',

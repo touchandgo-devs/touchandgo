@@ -13,7 +13,6 @@ PyChromecast==0.7.3
 pyquery==1.2.13
 pysrt==1.1.1
 python-daemon==1.6.1
-PyYAML==3.11
 qtfaststart==1.8
 requests==2.10.0
 simplejson==3.6.2
