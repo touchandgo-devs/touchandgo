@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name='Touchandgo',
-    version='0.13.2',
+    version='0.13.3',
     author='Felipe Lerena, Nicolás Demarchi',
     description='A python app and library to watch series magically',
     author_email='felipelerena@gmail.com - mail@gilgamezh.me',
@@ -48,6 +48,8 @@ setup(
         'touchandgo': ['templates/*',
                        'download/*.py',
                        'search/*.py',
-                       'tsproxy/*.py'],
+                       'tsproxy/*.py',
+                       'tsproxy/templates/*',
+                       ],
     },
 )
