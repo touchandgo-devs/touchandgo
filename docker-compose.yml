@@ -10,6 +10,8 @@ tsproxy:
   image: felipelerena/touchandgo:latest
   expose:
       - 5000
+      - 8001
   ports:
     - "5000:5000"
+    - "8001:8001"
   command: tsproxy 
