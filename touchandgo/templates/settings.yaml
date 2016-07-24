@@ -11,3 +11,5 @@ strategy:
     chunks_strat: 10
 default_search_engine: kat
 defrag: false
+force_ts_proxy_port: true
+ts_proxy_port: 8001

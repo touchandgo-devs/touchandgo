@@ -14,7 +14,7 @@ from jinja2 import FileSystemLoader
 
 from touchandgo.decorators import with_config_dir
 from touchandgo.helpers import (LOCK_FILE, get_free_port, get_interface,
-                                is_process_running)
+                                get_settings, is_process_running)
 from touchandgo.history import History
 from touchandgo.lock import Lock
 from touchandgo.logger import log_set_up
@@ -39,6 +39,7 @@ def serve(py_exec=None):
 
     def get_torrent(name, season=None, episode=None):
         interface = get_interface()
+        settings = get_settings()
         path = abspath(__file__)
         dir_path = dirname(path)
         exec_ = join(dir_path, "..",  "main.py")
@@ -51,7 +52,10 @@ def serve(py_exec=None):
             data = lock._get_file_data()
             port = data[4]
         else:
-            port = get_free_port()
+            if settings.force_ts_proxy_port:
+                port = settings.ts_proxy_port
+            else:
+                port = get_free_port()
             command += "--daemon --port %s " % port
             log.info(command)
             process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
