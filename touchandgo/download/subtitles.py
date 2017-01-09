@@ -41,4 +41,3 @@ class SubtitleDownloader(object):
         log.info("video_file: %s, filepath: %s, guess: %s, video: %s, "
                  "subtitle: %s", video_file, filepath, guess, video, subtitle)
         return subtitle
-

@@ -7,4 +7,3 @@ def with_config_dir(func):
         return func(*args, **kwargs)
 
     return _inner
-

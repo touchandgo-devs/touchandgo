@@ -1,17 +1,13 @@
-from KickassAPI import Search
 import logging
-
-from blessings import Terminal
 from os import _exit
 from time import time
-from torrentmediasearcher import TorrentMediaSearcher
 
+from blessings import Terminal
 from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
-from touchandgo.helpers import get_settings
 from touchandgo.history import History
 from touchandgo.search.helpers import kat_html2magnet
-from touchandgo.search.strike import StrikeAPI
+from touchandgo.search.leetx import Search1337x
 
 
 log = logging.getLogger('touchandgo.main')
@@ -23,7 +19,7 @@ class SearchAndStream(object):
     @with_config_dir
     def __init__(self, name, season=None, episode=None, sub_lang=None,
                  serve=False, quality=None, port=None, player=None,
-                 search=None, use_cache=True):
+                 use_cache=True):
         self.name = name
         self.season = season
         self.episode = episode
@@ -32,10 +28,6 @@ class SearchAndStream(object):
         self.quality = quality
         self.port = port
         self.player = player
-        if search is None:
-            settings = get_settings()
-            search = settings.default_search_engine
-        self.search_engine = search
         self.use_cache = use_cache
 
     @with_config_dir
@@ -78,12 +70,7 @@ class SearchAndStream(object):
     def search_magnet(self):
         print ("Searching magnet")
         log.info("Searching magnet")
-        if self.search_engine == "kat":
-            self.kat_search()
-        elif self.search_engine == "strike":
-            self.strike_search()
-        else:
-            self.tms_search()
+        self.search_1337x()
 
     def get_search_string(self):
         search_string = self.name
@@ -92,21 +79,22 @@ class SearchAndStream(object):
                                           str(self.episode).zfill(2))
         return search_string
 
-    def kat_search(self):
+    def search_1337x(self):
         search_string = self.get_search_string()
-        print("Searching '%s' on Kickass" % search_string)
-        log.info("Searching %s on Kickass", search_string)
-        results = Search(search_string).list()
+        print("Searching '%s' on 1337x" % search_string)
+        log.info("Searching %s on 1337x", search_string)
+        search = Search1337x(search_string)
+        results = search.list()
         print(term.clear())
         print(term.bold("Touchandgo\n"))
         print(term.red("Kickass Torrents Results"))
         if not self.serve:
             for i, result in enumerate(results, 1):
                 option = term.cyan("%s) " % i)
-                option += result.name + " "
-                option += term.yellow(result.size)
-                option += term.green(" S:" + result.seed)
-                option += term.red(" L:" + result.leech)
+                option += result['name'] + " "
+                option += term.yellow(result['size'])
+                option += term.green(" S:" + result['seeds'])
+                option += term.red(" L:" + result['leechs'])
                 print(option)
             input_text = "Select which torrent you want to download (1-%d): " % \
                 len(results)
@@ -119,33 +107,5 @@ class SearchAndStream(object):
                 opt = 0
         else:
             opt = 0
-        magnet = results[opt].magnet_link
-        if magnet is None:
-            magnet = kat_html2magnet(results[opt].torrent_link)
-        extra_tracker = "&tr=http%3A%2F%2Ftracker.nwps.ws%3A6969%2Fannounce"
-        results = {'magnet': magnet + extra_tracker}
-        self.download(results)
-
-    def strike_search(self):
-        search_string = self.get_search_string()
-        log.info("Searching %s on Strike", search_string)
-        strike = StrikeAPI(search_string)
-        magnet = strike.get_first_torrent_magnet()
-        results = {'magnet': magnet}
-        self.download(results)
-
-    def tms_search(self):
-        search = TorrentMediaSearcher
-        if self.season is None and self.episode is None:
-            search.request_movie_magnet('torrentproject', self.name,
-                                        callback=self.download,
-                                        quality=self.quality)
-        else:
-            if self.quality is None:
-                quality = 'normal'
-            else:
-                quality = self.quality
-            search.request_tv_magnet(provider='eztv', show=self.name,
-                                     season=int(self.season),
-                                     episode=int(self.episode),
-                                     quality=quality, callback=self.download)
+        result = search.get_magnet(opt)
+        self.download(result)

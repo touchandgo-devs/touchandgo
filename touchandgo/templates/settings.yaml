@@ -9,7 +9,6 @@ strategy:
     piece_st: 4
     last_piece_st: 2
     chunks_strat: 10
-default_search_engine: kat
 defrag: false
 force_ts_proxy_port: true
 ts_proxy_port: 8001

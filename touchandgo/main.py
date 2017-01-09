@@ -38,8 +38,6 @@ def main():
                         help="Show _all_ the logs")
     parser.add_argument("--player", default='vlc',
                         help="Player to use. vlc|omxplayer|chromecast")
-    parser.add_argument("--search", default=None,
-                        help="search lib to use (options are 'kat', 'tms', 'strike')")
     parser.add_argument("--nocache", action="store_false", default=True,
                         help="Search for the torrent again"),
 
@@ -58,8 +56,7 @@ def main():
                                      episode=args.episode_number,
                                      sub_lang=args.sub, serve=args.serve,
                                      quality=args.quality, port=args.port,
-                                     player=args.player, search=args.search,
-                                     use_cache=args.nocache)
+                                     player=args.player, use_cache=args.nocache)
         if args.daemon:
             def callback():
                 touchandgo.serve = True
@@ -67,8 +64,8 @@ def main():
             daemonize(args, callback)
         else:
             term = Terminal()
-            with term.fullscreen():
-                touchandgo.watch()
+            #with term.fullscreen():
+            touchandgo.watch()
     except ValueError as e:
         print(e)
 
