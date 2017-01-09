@@ -77,8 +77,6 @@ Ubuntu
 
     sudo apt-get install python-libtorrent python-dev
 
-<<<<<<< HEAD
-=======
 Archlinux
 +++++++++
     * libtorrent-rasterbar
@@ -89,7 +87,6 @@ Archlinux
 
     sudo pacman -Sy libtorrent-rasterbar base-devel python-pip2
 
->>>>>>> devel
 How to install
 --------------
 
