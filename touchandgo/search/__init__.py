@@ -6,7 +6,6 @@ from blessings import Terminal
 from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
 from touchandgo.history import History
-from touchandgo.search.helpers import kat_html2magnet
 from touchandgo.search.leetx import Search1337x
 
 
