@@ -5,6 +5,7 @@ from time import time
 from blessings import Terminal
 from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
+from touchandgo.helpers import get_settings
 from touchandgo.history import History
 from touchandgo.search.leetx import Search1337x
 from touchandgo.search.skytorrents import SearchSky
@@ -83,7 +84,15 @@ class SearchAndStream(object):
         search_string = self.get_search_string()
         print("Searching '%s'" % search_string)
         log.info("Searching %s", search_string)
-        search = SearchSky(search_string)
+
+        settings = get_settings()
+        engine = settings.default_search_engine
+        if engine == "leet":
+            search_class = Search1337x
+        else:
+            search_class = SearchSky
+
+        search = search_class(search_string)
         results = search.list()
         print(term.clear())
         print(term.bold("Touchandgo\n"))
