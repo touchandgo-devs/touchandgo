@@ -7,6 +7,7 @@ from touchandgo.decorators import with_config_dir
 from touchandgo.download import DownloadManager
 from touchandgo.history import History
 from touchandgo.search.leetx import Search1337x
+from touchandgo.search.skytorrents import SearchSky
 
 
 log = logging.getLogger('touchandgo.main')
@@ -80,13 +81,13 @@ class SearchAndStream(object):
 
     def search_1337x(self):
         search_string = self.get_search_string()
-        print("Searching '%s' on 1337x" % search_string)
-        log.info("Searching %s on 1337x", search_string)
-        search = Search1337x(search_string)
+        print("Searching '%s'" % search_string)
+        log.info("Searching %s", search_string)
+        search = SearchSky(search_string)
         results = search.list()
         print(term.clear())
         print(term.bold("Touchandgo\n"))
-        print(term.red("Kickass Torrents Results"))
+        print(term.red("Search Results"))
         if not self.serve:
             for i, result in enumerate(results, 1):
                 option = term.cyan("%s) " % i)
