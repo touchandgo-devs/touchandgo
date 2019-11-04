@@ -23,7 +23,7 @@ setup(
         'altasetting==0.1.1',
         'blessings==1.6',
         'colorama==0.3.2',
-        'flask==0.10.1',
+        'flask==1.0',
         'guessit==2.0.5',
         'netifaces==0.10.4',
         'ojota==2.0.1',
