@@ -33,7 +33,7 @@ setup(
         'pyQuery==1.2.13',
         'python-daemon==1.6.1',
         'qtfaststart==1.8',
-        'requests==2.3.0',
+        'requests==2.20.0',
         'simplejson==3.6.2',
         'subliminal==2.0.3',
     ],

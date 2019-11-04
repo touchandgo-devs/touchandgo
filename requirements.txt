@@ -12,6 +12,6 @@ pyquery==1.2.13
 pysrt==1.1.1
 python-daemon==1.6.1
 qtfaststart==1.8
-requests==2.10.0
+requests==2.20.0
 simplejson==3.6.2
 subliminal==2.0.3
