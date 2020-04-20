@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+"""Script to run the 'touchandgo' utility."""
+
+import os
+import sys
+
+# small hack to allow touchandgo to be run directly from the project, using
+# code from project itself, not anything already installed in the system
+parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
+if os.path.basename(parent_dir).startswith('touchandgo'):
+    # inside the project or an opened tarball!!
+    sys.path.insert(0, parent_dir)
+
+from touchandgo import main  # noqa (imports after fixing the path, not at the top)
+
+try:
+    rc = main.main()
+except Exception:
+    sys.exit(-1)
+
+sys.exit(rc)
