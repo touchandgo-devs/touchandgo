@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
 import argparse
 import logging
 import signal
@@ -58,16 +58,16 @@ def serve(py_exec=None):
                 port = get_free_port()
             command += "--daemon --port %s " % port
             log.info(command)
-            process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
+            _ = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
             sleep(1)
 
         redirect_url = "http://%s:%s" % (interface, port)
         serving = False
         while not serving:
             try:
-                req = requests.get("%s/status" % redirect_url)
+                _ = requests.get("%s/status" % redirect_url)
                 serving = True
-            except requests.ConnectionError, e:
+            except requests.ConnectionError:
                 sleep(1)
         log.info("redirecting to %s" % redirect_url)
         return redirect(redirect_url)
@@ -105,7 +105,7 @@ def serve(py_exec=None):
         lock = Lock(LOCK_FILE)
         try:
             kill(lock.get_pid(), signal.SIGQUIT)
-        except Exception, e:
+        except Exception:
             pass
         return "OK"
 
