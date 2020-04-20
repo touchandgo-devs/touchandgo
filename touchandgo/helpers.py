@@ -30,6 +30,7 @@ def get_settings():
         copyfile(default, settings_file)
 
     settings = Settings(settings_file, default)
+    settings.save_path = str(settings.save_path)
     return settings
 
 

@@ -1,16 +1,16 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
+
 import argparse
 import logging
 import sys
 
-from babelfish import Language
-from blessings import Terminal
 from libtorrent import version as libtorrent_version
 
+from babelfish import Language
+from blessings import Terminal
 from touchandgo.helpers import daemonize
 from touchandgo.logger import log_set_up
 from touchandgo.search import SearchAndStream
-
 
 log = logging.getLogger('touchandgo.main')
 
@@ -63,8 +63,6 @@ def main():
                 touchandgo.watch()
             daemonize(args, callback)
         else:
-            term = Terminal()
-            #with term.fullscreen():
             touchandgo.watch()
     except ValueError as e:
         print(e)

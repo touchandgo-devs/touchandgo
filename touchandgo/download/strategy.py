@@ -28,7 +28,7 @@ class DefaultStrategy(object):
             self.handle.piece_priority(i, 7)
             self.handle.set_piece_deadline(i, 3000)
 
-        self.chunks_strat = len(status.pieces) / 30
+        self.chunks_strat = len(status.pieces) // 30
 
     def block_requested(self, block_requested):
         # log.debug("block requested %s" % block_requested)

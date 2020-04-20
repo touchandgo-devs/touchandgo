@@ -1,29 +1,26 @@
-#! /usr/bin/env python2
-from __future__ import division
+#! /usr/bin/env python
 
 import argparse
-import thread
 import logging
-
-from os import _exit
-from os.path import join, exists
-from time import sleep
+from threading import Thread
 from datetime import datetime, timedelta
+from os import _exit
+from os.path import exists, join
+from time import sleep
 
 from blessings import Terminal
 from colorama import Fore
 from guessit import guessit
-from libtorrent import add_magnet_uri, session, storage_mode_t
+from libtorrent import session, storage_mode_t
 
 from touchandgo.constants import STATES
 from touchandgo.download.strategy import DefaultStrategy
 from touchandgo.download.subtitles import SubtitleDownloader
-from touchandgo.helpers import is_port_free, get_free_port, get_settings
+from touchandgo.helpers import get_free_port, get_settings, is_port_free
 from touchandgo.logger import log_set_up
-from touchandgo.output import VLCOutput, OMXOutput, CastOutput
-from touchandgo.settings import DEBUG, WAIT_FOR_IT, DEFAULT_PORT
+from touchandgo.output import CastOutput, OMXOutput, VLCOutput
+from touchandgo.settings import DEBUG, DEFAULT_PORT, WAIT_FOR_IT
 from touchandgo.stream_server import serve_file
-
 
 log = logging.getLogger('touchandgo.download')
 term = Terminal()
@@ -77,10 +74,11 @@ class DownloadManager(object):
     def init_handle(self):
         params = {
             "save_path": self.settings.save_path,
-            "allocation": storage_mode_t.storage_mode_sparse,
+            #"allocation": storage_mode_t.storage_mode_sparse,
+            "url": self.magnet,
             }
         self.session = session()
-        self.handle = add_magnet_uri(self.session, str(self.magnet), params)
+        self.handle = self.session.add_torrent(params)
 
         up_limit = self.settings.limits.upload
         if up_limit:
@@ -101,8 +99,8 @@ class DownloadManager(object):
             print("Downloading metadata")
             log.info("Downloading metadata")
             while not self.handle.has_metadata():
-                print(term.clear())
-                print(self.screen_data(DEBUG or self.settings.defrag))
+                print((term.clear()))
+                print((self.screen_data(DEBUG or self.settings.defrag)))
                 elapsed_time = datetime.now() - self.start_time
                 if elapsed_time > timedelta(minutes=2):
                     print("Torrent metadata not available")
@@ -122,8 +120,8 @@ class DownloadManager(object):
                 if not self.streaming and is_seed:
                     self.stream()
 
-                print(term.clear())
-                print(self.screen_data(DEBUG or self.settings.defrag))
+                print((term.clear()))
+                print((self.screen_data(DEBUG or self.settings.defrag)))
                 sleep(1)
         except KeyboardInterrupt:
             if self.httpd is not None:
@@ -177,14 +175,14 @@ class DownloadManager(object):
             self.streaming = True
             pieces = self.status.pieces
             self._served_blocks = [False for i in range(len(pieces))]
-            self.stream_th = thread.start_new_thread(self.callback, (self, ))
+            self.stream_th = Thread(target=self.callback, args=(self, )).start()
             if not self.serve:
                 params = ()
                 if self.player == "chromecast":
                     chromecast = CastOutput.select_chromecast()
                     params = (chromecast, )
 
-                self.player_th = thread.start_new_thread(self.output, params)
+                self.player_th = Thread(target=self.output, args=params).start()
 
     def block_served(self, block):
         self._served_blocks[block] = True
