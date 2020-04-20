@@ -74,7 +74,7 @@ class DownloadManager(object):
     def init_handle(self):
         params = {
             "save_path": self.settings.save_path,
-            #"allocation": storage_mode_t.storage_mode_sparse,
+            "storage_mode": storage_mode_t.storage_mode_sparse,
             "url": self.magnet,
             }
         self.session = session()
