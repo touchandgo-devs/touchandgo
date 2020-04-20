@@ -86,8 +86,7 @@ class SearchAndStream:
                 option += term.green(" S:" + result['Seeders'])
                 option += term.red(" L:" + result['Leechers'])
                 print(option)
-            input_text = "Select which torrent you want to download (1-%d): " % \
-                len(results)
+            input_text = f"Select which torrent you want to download (1-{len(results)}: "
             user_inuput = input(input_text)
             try:
                 opt = int(user_inuput) - 1
