@@ -75,28 +75,26 @@ class SearchAndStream:
         log.info("Searching %s on 1337x", search_string)
         leetClient = Py1337x()
         results = leetClient.search(search_string)
-        # print(term.clear())
-        # print(term.bold("Touchandgo\n"))
-        # print(term.red("1337x Torrents Results"))
-        # if not self.serve:
-        #     for i, result in enumerate(results, 1):
-        #         option = term.cyan("%s) " % i)
-        #         option += result['name'] + " "
-        #         option += term.yellow(result['size'])
-        #         option += term.green(" S:" + result['seeds'])
-        #         option += term.red(" L:" + result['leechs'])
-        #         print(option)
-        #     input_text = "Select which torrent you want to download (1-%d): " % \
-        #         len(results)
-        #     user_inuput = input(input_text)
-        #     try:
-        #         opt = int(user_inuput) - 1
-        #         if opt > len(results) or opt < 1:
-        #             opt = 0
-        #     except ValueError:
-        #         opt = 0
-        # else:
-        #     opt = 0
-        # result = results[opt].get("MagnetLink")
-        # self.download(result)
-        return results[0].get("MagnetLink")
+        print(term.clear())
+        print(term.bold("Touchandgo\n"))
+        print(term.red("1337x Torrents Results"))
+        if not self.serve:
+            for i, result in enumerate(results, start=1):
+                option = term.cyan("%s) " % i)
+                option += result['Uploaded By'] + " "
+                option += term.yellow(result['Total size'])
+                option += term.green(" S:" + result['Seeders'])
+                option += term.red(" L:" + result['Leechers'])
+                print(option)
+            input_text = "Select which torrent you want to download (1-%d): " % \
+                len(results)
+            user_inuput = input(input_text)
+            try:
+                opt = int(user_inuput) - 1
+                if opt > len(results) or opt < 1:
+                    opt = 0
+            except ValueError:
+                opt = 0
+        else:
+            opt = 0
+        return results[opt].get("MagnetLink")
